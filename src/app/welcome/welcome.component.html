@@ -1,0 +1,47 @@
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <ul class="navbar-nav">
+    <li class="nav-item active">
+      <a class="nav-link">COLD</a>
+    </li>
+  </ul>
+  <ul class="navbar-nav ml-auto">
+    <li class="nav-item">
+      <a class="nav-link" (click)="logout()" style="cursor: pointer;">Logout</a>
+    </li>
+  </ul>
+</nav>
+<div class="container p-5">
+    <div class="container jumbotron text-center vertical-center">
+        <h1>Welcome to COLD</h1>
+        <p><b>CO</b>llaboration based on <b>L</b>ink <b>D</b>ata</p>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="basic-addon3">https://example.com/users/</span>
+            </div>
+            <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
+        </div>
+        <button type="button" class="btn btn-primary btn-lg btn-block my-3">Create a workspace</button>
+    
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
+        </div>
+        <button type="button" class="btn btn-secondary btn-lg btn-block my-3">Join a workspace</button>
+    </div>
+</div>
+
+
+<!--
+    <div class="profile-container">
+    <h1>Welcome to COLD</h1>
+    
+    <button type="button" class="wide-button profile-save-button" style="display: flex; justify-content: center">Create a workspace</button>
+    <div class="input-group mb-3" style="width: 280px">
+      <div class="input-group-prepend d-flex justify-content-center">
+        <span class="input-group-text" id="basic-addon3">https://example.com/users/</span>
+      </div>
+      <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
+    </div>
+    <br>
+    <button type="button" class="wide-button profile-save-button" style="display: flex; justify-content: center">Join a workspace</button>
+</div>
+-->
