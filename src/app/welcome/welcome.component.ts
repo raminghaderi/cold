@@ -29,5 +29,4 @@ export class WelcomeComponent implements OnInit {
   logout() {
     this.auth.solidSignOut();
   }
-
 }

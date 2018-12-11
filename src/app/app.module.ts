@@ -17,6 +17,7 @@ import { RegisterComponent } from './register/register.component';
 import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { WelcomeComponent } from './welcome/welcome.component';
+import { WorkspaceComponent } from './workspace/workspace.component';
 
 
 
@@ -50,6 +51,10 @@ const routes: Routes = [
   {
     path: 'welcome',
     component: WelcomeComponent
+  },
+  {
+    path: 'workspace',
+    component: WorkspaceComponent
   }
 ];
 
@@ -61,7 +66,8 @@ const routes: Routes = [
     DashboardComponent,
     CardComponent,
     RegisterComponent,
-    WelcomeComponent
+    WelcomeComponent,
+    WorkspaceComponent
   ],
   imports: [
     BrowserModule,
