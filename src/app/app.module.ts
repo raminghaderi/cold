@@ -2,9 +2,10 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+
 import { AppComponent } from './app.component';
-import {LoginPopupComponent} from './login-popup/login-popup.component';
-import {LoginComponent} from './login/login.component';
+import { LoginPopupComponent } from './login-popup/login-popup.component';
+import { LoginComponent } from './login/login.component';
 import { CardComponent } from './card/card.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 
