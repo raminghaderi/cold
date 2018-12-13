@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import {LoginPopupComponent} from './login-popup/login-popup.component';
@@ -17,6 +18,8 @@ import { RegisterComponent } from './register/register.component';
 import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { WelcomeComponent } from './welcome/welcome.component';
+import { LongchatComponent } from './longchat/longchat.component';
+import { ChatComponent } from './chat/chat.component';
 
 
 
@@ -50,6 +53,14 @@ const routes: Routes = [
   {
     path: 'welcome',
     component: WelcomeComponent
+  },
+  {
+    path: 'long-chat',
+    component: LongchatComponent
+  },
+  {
+    path: 'chat',
+    component: ChatComponent
   }
 ];
 
@@ -61,15 +72,18 @@ const routes: Routes = [
     DashboardComponent,
     CardComponent,
     RegisterComponent,
-    WelcomeComponent
+    WelcomeComponent,
+    LongchatComponent,
+    ChatComponent
   ],
   imports: [
     BrowserModule,
+    HttpClientModule,
     FormsModule,
     RouterModule.forRoot(routes),
     NgSelectModule,
     ToastrModule.forRoot(),
-    BrowserAnimationsModule //required for toastr
+    BrowserAnimationsModule // required for toastr
   ],
   providers: [AuthService],
   bootstrap: [AppComponent]

@@ -12,7 +12,8 @@
   "browser": {
     "crypto": false,
     "fetch": false,
-    "window": false
+    "window": false,
+    "fs":false
   },
   "private": true,
   "dependencies": {
