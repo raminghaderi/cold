@@ -52,7 +52,8 @@ const routes: Routes = [
   },
   {
     path: 'welcome',
-    component: WelcomeComponent
+    component: WelcomeComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: 'long-chat',
