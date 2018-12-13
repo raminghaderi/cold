@@ -56,7 +56,7 @@ const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
-    path: 'long-chat',
+    path: 'longchat',
     component: LongchatComponent
   },
   {

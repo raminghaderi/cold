@@ -1,4 +1,6 @@
+import { UpdateManager } from './../../assets/types/rdflib/index.d';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import SolidFileClient from 'solid-file-client';
 import UI from 'solid-ui';
 
 declare let $rdf:any;
@@ -12,19 +14,46 @@ declare let $rdf:any;
 export class LongchatComponent implements OnInit {
     
     ns = UI.ns;
-    kb = $rdf.graph();;
+    kb = $rdf.graph();
+    fileClient = SolidFileClient;
 
     mainClass:string = this.ns.meeting('LongChat');
     name:string = "long chat";
+    updater = new $rdf.UpdateManager(this.kb);
+
+
+    longchat: String = `
+@prefix : <#>.
+@prefix mee: <http://www.w3.org/ns/pim/meeting#>.
+@prefix ic: <http://www.w3.org/2002/12/cal/ical#>.
+@prefix XML: <http://www.w3.org/2001/XMLSchema#>.
+@prefix flow: <http://www.w3.org/2005/01/wf/flow#>.
+@prefix c: </profile/card#>.
+@prefix ui: <http://www.w3.org/ns/ui#>.
+@prefix n0: <http://purl.org/dc/elements/1.1/>.
+
+:id1544542982461
+    ic:dtstart "2018-12-11T15:43:02Z"^^XML:dateTime;
+    flow:participant c:me;
+    ui:backgroundColor "#faf8ca".
+:this
+    a mee:LongChat;
+    n0:author c:me;
+    n0:created "2018-12-11T15:42:07Z"^^XML:dateTime;
+    n0:title "Chat channel";
+    flow:participation :id1544542982461;
+    ui:sharedPreferences :SharedPreferences.
+    `;
+
 
   constructor() { }
 
   ngOnInit() {
     var paneOptions: any = {
         me: {
-          uri:"https://raminholuiz.solid.community/profile/card#me"
+          uri:"https://raminholuiz.inrupt.net/profile/card#me"
         },
-        newBase: "https://raminholuiz.solid.community/Long%20Chat/"
+        newBase: "https://raminholuiz.inrupt.net/public/Long%20Chat/"
       };
     this.mintNew(paneOptions);
   }
@@ -37,7 +66,7 @@ export class LongchatComponent implements OnInit {
   }
 
   mintNew (newPaneOptions:any) {
-    let updater = this.kb.updater
+    
     if (newPaneOptions.me && !newPaneOptions.me.uri) throw new Error('chat mintNew:  Invalid userid ' + newPaneOptions.me)
 
     var newInstance = newPaneOptions.newInstance = newPaneOptions.newInstance || this.kb.sym(newPaneOptions.newBase + 'index.ttl#this')
@@ -50,8 +79,18 @@ export class LongchatComponent implements OnInit {
       this.kb.add(newInstance, this.ns.dc('author'), newPaneOptions.me, newChatDoc)
     }
 
-    return new Promise((resolve, reject) => {
-      updater.put(
+    this.fileClient.createFile(newPaneOptions.newBase+"index.ttl").then( success => {
+      if(!success) console.log(this.fileClient.err)
+      else console.log( `Created file ${newPaneOptions.newBase}.`)
+  })
+
+  this.fileClient.updateFile( newPaneOptions.newBase+"index.ttl", this.longchat ).then( success => {
+    if(!success) console.log(this.fileClient.err)
+    else console.log( `Updated ${newPaneOptions.newBase}.`)
+})
+
+    /*return new Promise((resolve, reject) => {
+      this.updater.update(
         newChatDoc,
         this.kb.statementsMatching(undefined, undefined, undefined, newChatDoc),
         'text/turtle',
@@ -63,7 +102,7 @@ export class LongchatComponent implements OnInit {
               message))
           };
         })
-    })
+    })*/
   }
 
   render(uri, dom){
@@ -114,7 +153,7 @@ export class LongchatComponent implements OnInit {
        for (let propuri in prefMap) {
          options[propuri.split('#')[1]] = prefMap[propuri]
        }
-       div.appendChild(UI.infiniteMessageArea(dom, this.kb, subject, options))
+       div.appendChild(UI.infiniteMesagseArea(dom, this.kb, subject, options))
      }, err => UI.widgets.complain(err))
  
      return div

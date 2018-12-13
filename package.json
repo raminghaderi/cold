@@ -13,7 +13,7 @@
     "crypto": false,
     "fetch": false,
     "window": false,
-    "fs":false
+    "fs": false
   },
   "private": true,
   "dependencies": {
@@ -39,12 +39,13 @@
     "rdflib": "^0.19.0",
     "rxjs": "^6.0.0",
     "solid-auth-client": "^2.2.3",
+    "solid-file-client": "jeff-zucker/solid-file-client",
+    "solid-ui": "^0.11.12",
     "stdio": "^0.2.7",
     "text-encoding": "^0.6.4",
     "webcrypto": "^0.1.1",
     "whatwg-url": "^7.0.0",
-    "zone.js": "^0.8.26",
-    "solid-file-client": "jeff-zucker/solid-file-client"
+    "zone.js": "^0.8.26"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.6.8",

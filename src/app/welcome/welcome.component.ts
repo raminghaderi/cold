@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/solid.auth.service';
 import { RdfService } from '../services/rdf.service';
 import SolidFileClient from 'solid-file-client';
-import { HttpClient } from '@angular/common/http';
 
 declare let solid: any;
 declare let $rdf: any;
@@ -20,8 +19,7 @@ export class WelcomeComponent implements OnInit {
   webId: String;
   
   constructor(private auth: AuthService,
-              private rdf: RdfService,
-              private http: HttpClient) { }
+              private rdf: RdfService) { }
 
   ngOnInit() {
     this.getWebId();
