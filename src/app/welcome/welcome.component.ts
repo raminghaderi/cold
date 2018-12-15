@@ -17,6 +17,7 @@ export class WelcomeComponent implements OnInit {
   fileClient = SolidFileClient;
   folderName: String;
   webId: String;
+  
   constructor(private auth: AuthService,
               private rdf: RdfService) { }
 
