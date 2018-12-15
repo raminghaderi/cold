@@ -33,8 +33,6 @@ export class WelcomeComponent implements OnInit {
   logout() {
     this.auth.solidSignOut();
   }
-<<<<<<< HEAD
-=======
 
   createFolder() {
 
@@ -49,6 +47,5 @@ export class WelcomeComponent implements OnInit {
         }
     });
   }
-
->>>>>>> caf210883559e6ec9905ad5e088c0053a5b3be79
+  
 }
