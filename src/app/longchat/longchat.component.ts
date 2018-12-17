@@ -3,6 +3,8 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import SolidFileClient from 'solid-file-client';
 import UI from 'solid-ui';
 
+// import * as SolidFileClient from 'solid-file-client';
+
 declare let $rdf:any;
 
 @Component({
