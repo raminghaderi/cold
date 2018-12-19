@@ -1,6 +1,9 @@
 import { UpdateManager } from './../../assets/types/rdflib/index.d';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import SolidFileClient from 'solid-file-client';
+
+import * as SolidFileClient from 'solid-file-client';
+//const filedc = require('solid-file-client');
+
 import UI from 'solid-ui';
 
 declare let $rdf:any;
@@ -51,9 +54,9 @@ export class LongchatComponent implements OnInit {
   ngOnInit() {
     var paneOptions: any = {
         me: {
-          uri:"https://raminholuiz.inrupt.net/profile/card#me"
+          uri:"https://apraku.solid.community/profile/card#me"
         },
-        newBase: "https://raminholuiz.inrupt.net/public/Long%20Chat/"
+        newBase: "https://apraku.solid.community/public/"
       };
     this.mintNew(paneOptions);
   }

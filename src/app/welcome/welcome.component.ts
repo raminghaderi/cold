@@ -2,7 +2,12 @@ import { currentSession } from 'solid-auth-client';
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/solid.auth.service';
 import { RdfService } from '../services/rdf.service';
-import SolidFileClient from 'solid-file-client';
+import * as SolidFileClient from 'solid-file-client';
+import { PodHandlerService } from '../services/pod-handler.service';
+import { SolidSession } from '../models/solid-session.model';
+import { Observable } from 'rxjs';
+
+//const filedc = require('solid-file-client');
 
 declare let solid: any;
 declare let $rdf: any;
@@ -12,41 +17,57 @@ declare let $rdf: any;
   templateUrl: './welcome.component.html',
   styleUrls: ['./welcome.component.css']
 })
+
 export class WelcomeComponent implements OnInit {
 
   fileClient = SolidFileClient;
-  folderName: String;
-  webId: String;
+  folderName: string;
+  webId: string;
+  workspace: string;
+  session: SolidSession;
+  profileId:any
+
+  
   
   constructor(private auth: AuthService,
-              private rdf: RdfService) { }
+              private rdf: RdfService,
+              private podhandler:PodHandlerService) { }
 
   ngOnInit() {
-    this.getWebId();
+    this.getSession()
   }
 
-  getWebId = async function() {
+  getSession(){
+     this.auth.session.subscribe((val: SolidSession)=>{
+      this.session = val
+    this.profileId = this.session.webId
+    this.webId = this.session.webId.split('profile')[0]
+      this.initForm()
+  //   console.log(JSON.stringify(this.session));
+    })
+  }
 
-    const session = await solid.auth.currentSession();
-    this.webId = session.webId.split('profile')[0] + 'public/';
-  };
+  async initForm (){
+  let loc = await this.podhandler.getStorageLocation(this.profileId)
+    console.log("loc: "+loc)
+     this.workspace = loc+''+'public/'
+ 
+  }
 
   logout() {
     this.auth.solidSignOut();
   }
 
-  createFolder() {
 
-      // tslint:disable-next-line:prefer-const
-      let url = this.webId + '' + this.folderName;
+  initWorkspace() {
+      let url = this.workspace + '' + this.folderName;
       console.log(url);
-      this.fileClient.createFolder( url ).then( success => {
-        if (!success) {
-          console.log(this.fileClient.err);
-        } else {
-          console.log( `Created folder ${url}.`);
-        }
-    });
+      // check if folder exists
+      this.podhandler.initializeContainers(this.folderName);
+
   }
+
+  // TODO: redirect to dashboard and 
+
 
 }

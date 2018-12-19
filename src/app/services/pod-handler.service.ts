@@ -4,7 +4,7 @@ import { RdfService } from '../services/rdf.service'
 import * as SolidFileClient from 'solid-file-client'
 import * as utils from '../utils/utililties'
 import { SolidSession } from '../models/solid-session.model';
-
+import containers from '../containers.json'
 
 import solidnamespace from 'solid-namespace';
 
@@ -15,14 +15,19 @@ declare let $rdf: any;
   providedIn: 'root'
 })
 export class PodHandlerService {
-  ns = solidnamespace($rdf);
-  store = $rdf.graph()
+  ns = solidnamespace($rdf)
+  store = this.rdf.store
   session: SolidSession
   fetcher: any
   updater: any
   fileClient = SolidFileClient
   me:any
   webid:any
+
+  defaultContainers: {}
+  readonly publicStorage = "public/"
+
+  readonly testWorkspace = "testchat/"
 
 
   constructor(private auth: AuthService, private rdf: RdfService) {
@@ -33,14 +38,6 @@ export class PodHandlerService {
       
    }
 
-  /**
-   * Create workspace
-   * initialise turtle files
-   * Subscribe to websocket
-   */
-  initWorkspace(){
-
-  }
 
   getSession(){
     this.auth.session.subscribe((val: SolidSession)=>{
@@ -75,16 +72,93 @@ export class PodHandlerService {
     let url = workspace + '' + containerName;
     console.log(url);
     this.fileClient.createFolder( url ).then( success => {
-      if (!success) {
-        console.log(this.fileClient.err);
-      } else {
+      if (success) {
         console.log( `Created folder ${url}.`);
+        this.fileClient.createFile
+      } else {
+        console.log(this.fileClient.err);
       }
   });
 }
 
-  prepareContainers=()=>{
+  /**
+   * Create workspace
+   * initialise turtle files
+   * Subscribe to websocket
+   */
+  initializeContainers = async (foldername:string)=>{
+  
+      this.defaultContainers = containers;
+          const storage = await this.getStorageLocation(this.session.webId)
+    
+             var parentDir = storage + this.publicStorage+containers.rootContainer+"/"+foldername+"/"
+           //containers definition is loaded. Now time to ensure containers exists
+           for (var key in containers.subContainers)
+           {
+             (async (k)=> {
+             // if (!defaultContainers.hasOwnProperty(k)) continue;
+             let value = containers.subContainers[k];
+             let resType = (typeof value === "object")? "resource" : "container";
+             
+             let resPath = "";
+             let resData = "";
+    
+             if ( resType === "container" )
+               resPath = value;
+             else {
+               resPath = value.path;
+               resData = value.data;
+             }
+    
+          
+    
+              console.log("Full path: "+parentDir+resPath);
+              let url = parentDir+resPath
+              this.resourceExists(url,true)
+              .then(response=>{
+                  console.log("Resource already exists: "+url)
+              })
+              .catch(err=>{
+                // folder doesn't exist
+                      this.fileClient.createFolder( url ).then( success => {
+                if (success) {
+                  console.log( `Created folder ${url}.`);
+                } else {
+                  console.log(this.fileClient.err)
+                }
+            });
+              });
 
+            await  this.createNewChat(parentDir)
+
+           /* 
+              this.podHandle.resourceExists(parentDir , resPath)
+              .then( (response)=>{
+                console.log("success: status is " + response);
+              //	this.conCreationStatus[response.parentDir + response.resName] = "Created";
+              })
+              .catch( (response)=> {
+                console.log("failure: status is " + response.status);
+    
+              //	var isCreated = this.conCreationStatus[response.parentDir+response.resName] === "Created" ||
+              //					this.conCreationStatus[response.parentDir+response.resName] === "Creating";
+    
+                if (response.status === 404 )	//not found
+                {
+                  this.conCreationStatus[response.parentDir+response.resName] = "Creating";
+                  this.podHandle.createContainer(response.parentDir , response.resName, function(meta){
+                    console.log("container created: " + meta.url);
+                    this.conCreationStatus[response.parentDir + response.resName] = "Created";
+                  }, function (error) {
+                    console.log("error creating container " + error);
+                  }, resData);
+                }
+              });
+              */
+    
+             })(key);
+          }
+      
   }
 
   async getStorageLocation (webid:any): Promise<{}>
@@ -108,6 +182,34 @@ export class PodHandlerService {
     });
     
      
+  }
+
+  createNewChat(location:string){
+    //let useWorkspace = this.getStorageLocation(this.session.webId) + this.publicStorage+containers.rootContainer+this.testWorkspace;
+    var newInstance = this.store.sym(location + 'index.ttl#this')
+    var newChatDoc = newInstance.doc()
+
+    this.store.add(newInstance, this.ns.rdf('type'), this.ns.meeting('Chat'), newChatDoc)
+    this.store.add(newInstance, this.ns.dc('title'), 'Chat', newChatDoc)
+    this.store.add(newInstance, this.ns.dc('created'), new Date(), newChatDoc)
+    
+      this.store.add(newInstance, this.ns.dc('author'), this.me, newChatDoc)
+  
+
+    return new Promise( (resolve, reject)=> {
+      this.updater.put(
+        newChatDoc,
+        this.store.statementsMatching(undefined, undefined, undefined, newChatDoc),
+        'text/turtle',
+        function (uri2, ok, message) {
+          if (ok) {
+            resolve(uri2)
+          } else {
+            reject(new Error('FAILED to save new tool at: ' + uri2 + ' : ' +
+              message))
+          };
+        })
+    })
   }
 
 }
