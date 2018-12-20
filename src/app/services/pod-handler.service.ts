@@ -25,9 +25,9 @@ export class PodHandlerService {
   webid:any
 
   defaultContainers: {}
-  readonly publicStorage = "public/"
+  readonly publicStorage = "public"
 
-  readonly testWorkspace = "testchat/"
+  readonly testWorkspace = "testchat"
 
 
   constructor(private auth: AuthService, private rdf: RdfService) {
@@ -69,16 +69,32 @@ export class PodHandlerService {
   }
 
   createContainer(workspace,containerName) {
-    let url = workspace + '' + containerName;
-    console.log(url);
-    this.fileClient.createFolder( url ).then( success => {
+    let url = workspace + '/' + containerName;
+  
+    return new Promise((resolve,reject)=>{
+    this.resourceExists(url,true)
+    .then(response=>{
+        console.log("Resource already exists: "+url)
+        reject ("Resource already exists: "+url)
+    })
+    .catch(err=>{
+      // folder doesn't exist
+            this.fileClient.createFolder( url ).then( success => {
       if (success) {
         console.log( `Created folder ${url}.`);
-        this.fileClient.createFile
-      } else {
-        console.log(this.fileClient.err);
+        resolve (url)
+      } 
+      else {
+        console.log(this.fileClient.err)
+        reject (this.fileClient.err)
       }
-  });
+  })
+    })
+
+    })
+ 
+  
+
 }
 
   /**
@@ -87,79 +103,66 @@ export class PodHandlerService {
    * Subscribe to websocket
    */
   initializeContainers = async (foldername:string)=>{
-  
+      let isNew=true;
       this.defaultContainers = containers;
           const storage = await this.getStorageLocation(this.session.webId)
     
-             var parentDir = storage + this.publicStorage+containers.rootContainer+"/"+foldername+"/"
-           //containers definition is loaded. Now time to ensure containers exists
-           for (var key in containers.subContainers)
-           {
-             (async (k)=> {
-             // if (!defaultContainers.hasOwnProperty(k)) continue;
-             let value = containers.subContainers[k];
-             let resType = (typeof value === "object")? "resource" : "container";
+             var parentDir = storage + this.publicStorage;
              
-             let resPath = "";
-             let resData = "";
-    
-             if ( resType === "container" )
-               resPath = value;
-             else {
-               resPath = value.path;
-               resData = value.data;
-             }
-    
-          
-    
-              console.log("Full path: "+parentDir+resPath);
-              let url = parentDir+resPath
-              this.resourceExists(url,true)
-              .then(response=>{
-                  console.log("Resource already exists: "+url)
-              })
-              .catch(err=>{
-                // folder doesn't exist
-                      this.fileClient.createFolder( url ).then( success => {
-                if (success) {
-                  console.log( `Created folder ${url}.`);
-               (async () => { await this.createNewChat(parentDir) })()  
-                } 
-                else {
-                  console.log(this.fileClient.err)
-                }
-            });
-              });
+          // create root container for app data
+      await    this.createContainer(parentDir,containers.rootContainer)
+      .then(url0=>{
 
+
+      })
+      .catch(err=>{
+        console.log(err)
+        //TODO: check here if the error code is 404 
+      } )
+      
+     parentDir +="/"+containers.rootContainer
+        // Create provided workspace container
+      await  this.createContainer(parentDir,foldername)
+      .then(workspace=>{ 
+       parentDir = ''+workspace
+         //containers definition is loaded. Now time to ensure containers exists
+     for (var key in containers.subContainers)
+     {
+       (async (k)=> {
+       
+       let value = containers.subContainers[k];
+       let resType = (typeof value === "object")? "resource" : "container";
+       
+       let resPath = "";
+       let resData = "";
+
+       if ( resType === "container" )
+         resPath = value;
+       else {
+         resPath = value.path;
+         resData = value.data;
+       }            
+
+        console.log("Full path: "+parentDir+resPath);
+       this.createContainer(parentDir,resPath)
+       .then(url2=>{
             
+       }).catch(err2 =>{
+          console.log(err2)
+       })
 
-           /* 
-              this.podHandle.resourceExists(parentDir , resPath)
-              .then( (response)=>{
-                console.log("success: status is " + response);
-              //	this.conCreationStatus[response.parentDir + response.resName] = "Created";
-              })
-              .catch( (response)=> {
-                console.log("failure: status is " + response.status);
     
-              //	var isCreated = this.conCreationStatus[response.parentDir+response.resName] === "Created" ||
-              //					this.conCreationStatus[response.parentDir+response.resName] === "Creating";
-    
-                if (response.status === 404 )	//not found
-                {
-                  this.conCreationStatus[response.parentDir+response.resName] = "Creating";
-                  this.podHandle.createContainer(response.parentDir , response.resName, function(meta){
-                    console.log("container created: " + meta.url);
-                    this.conCreationStatus[response.parentDir + response.resName] = "Created";
-                  }, function (error) {
-                    console.log("error creating container " + error);
-                  }, resData);
-                }
-              });
-              */
-    
-             })(key);
-          }
+       })(key)
+    }
+
+      }).catch(err1=>{
+        isNew = false  
+        console.log("Not  new")
+      })
+              
+
+          if(isNew) 
+            await this.createNewChat(parentDir) 
       
   }
 
@@ -188,7 +191,7 @@ export class PodHandlerService {
 
   createNewChat(location:string){
     //let useWorkspace = this.getStorageLocation(this.session.webId) + this.publicStorage+containers.rootContainer+this.testWorkspace;
-    var newInstance = this.store.sym(location + 'index.ttl#this')
+    var newInstance = this.store.sym(location + '/index.ttl#this')
     var newChatDoc = newInstance.doc()
 
     this.store.add(newInstance, this.ns.rdf('type'), this.ns.meeting('Chat'), newChatDoc)
