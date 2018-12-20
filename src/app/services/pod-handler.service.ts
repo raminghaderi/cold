@@ -123,13 +123,15 @@ export class PodHandlerService {
                       this.fileClient.createFolder( url ).then( success => {
                 if (success) {
                   console.log( `Created folder ${url}.`);
-                } else {
+               (async () => { await this.createNewChat(parentDir) })()  
+                } 
+                else {
                   console.log(this.fileClient.err)
                 }
             });
               });
 
-            await  this.createNewChat(parentDir)
+            
 
            /* 
               this.podHandle.resourceExists(parentDir , resPath)
@@ -210,6 +212,13 @@ export class PodHandlerService {
           };
         })
     })
+  }
+
+  /**
+   * Get a list of workspaces
+   */
+  getWorkSpaces(){
+
   }
 
 }
