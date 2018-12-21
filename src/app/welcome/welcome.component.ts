@@ -35,6 +35,12 @@ export class WelcomeComponent implements OnInit {
 
   ngOnInit() {
     this.getSession()
+   
+    // Find a better way to call this function
+    setTimeout(() => {
+      this.getExistingWorkspaces()
+    }, 500);
+  
   }
 
   getSession(){
@@ -42,14 +48,15 @@ export class WelcomeComponent implements OnInit {
       this.session = val
     this.profileId = this.session.webId
     this.webId = this.session.webId.split('profile')[0]
-      this.initForm()
-  //   console.log(JSON.stringify(this.session));
+    this.initForm()
+  
     })
+
+       
   }
 
   async initForm (){
   let loc = await this.podhandler.getStorageLocation(this.profileId)
-    console.log("loc: "+loc)
      this.workspace = loc+''+'public/'
  
   }
@@ -64,10 +71,16 @@ export class WelcomeComponent implements OnInit {
       console.log(url);
       // check if folder exists
       this.podhandler.initializeContainers(this.folderName);
-
   }
 
   // TODO: redirect to dashboard and 
+  getExistingWorkspaces=async()=>{
+   await this.podhandler.getListWorkSpaces()
+   .then(value =>{
 
-
+    // do something with the workspaces
+      console.log("Workspaces: "+JSON.stringify(value))
+   })
+      
+  }
 }

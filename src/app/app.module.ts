@@ -20,6 +20,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { LongchatComponent } from './longchat/longchat.component';
+import { PodHandlerService } from './services/pod-handler.service';
 
 
 
@@ -81,7 +82,7 @@ const routes: Routes = [
     ToastrModule.forRoot(),
     BrowserAnimationsModule // required for toastr
   ],
-  providers: [AuthService],
+  providers: [AuthService,PodHandlerService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

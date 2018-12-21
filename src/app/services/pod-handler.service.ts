@@ -8,7 +8,6 @@ import containers from '../containers.json'
 
 import solidnamespace from 'solid-namespace';
 
-declare let solid: any;
 declare let $rdf: any;
 
 @Injectable({
@@ -23,28 +22,38 @@ export class PodHandlerService {
   fileClient = SolidFileClient
   me:any
   webid:any
+  activeWorkspace:any
+  existingWorkspaces:any[]
+  storageLocation:string
 
-  defaultContainers: {}
+ 
+
   readonly publicStorage = "public"
-
-  readonly testWorkspace = "testchat"
 
 
   constructor(private auth: AuthService, private rdf: RdfService) {
-      this.fetcher = rdf.fetcher
-      this.updater = rdf.updateManager
-      this.session = rdf.session
+      this.fetcher = this.rdf.fetcher
+      this.updater = this.rdf.updateManager
+      this.session = this.rdf.session
       this.getSession()
-      
    }
 
 
-  getSession(){
-    this.auth.session.subscribe((val: SolidSession)=>{
+   getSession(){
+    this.auth.session.subscribe(async (val: SolidSession)=>{
      this.session = val
    this.webid = this.session.webId.split('profile')[0]
   this.me =  $rdf.sym(this.webid);
- //   console.log(JSON.stringify(this.session));
+ 
+   //this.storageLocation = await 
+   this.getStorageLocation(this.session.webId)
+   .then(val=>{
+     this.storageLocation = val;
+    
+   //  if(this.storageLocation)
+      //  this.getListWorkSpaces()
+   })
+      
    })
  }
 
@@ -97,6 +106,12 @@ export class PodHandlerService {
 
 }
 
+ async defaultAppContainerUrl (): Promise<string>{
+   return this.storageLocation+ this.publicStorage +"/"+containers.rootContainer
+    
+  } 
+
+
   /**
    * Create workspace
    * initialise turtle files
@@ -104,10 +119,9 @@ export class PodHandlerService {
    */
   initializeContainers = async (foldername:string)=>{
       let isNew=true;
-      this.defaultContainers = containers;
-          const storage = await this.getStorageLocation(this.session.webId)
+  
     
-             var parentDir = storage + this.publicStorage;
+             var parentDir = this.storageLocation + this.publicStorage;
              
           // create root container for app data
       await    this.createContainer(parentDir,containers.rootContainer)
@@ -163,35 +177,33 @@ export class PodHandlerService {
 
           if(isNew) 
             await this.createNewChat(parentDir) 
+
+  }
+
+   getStorageLocation = async(webid:any)=>
+  {  
+    return  new Promise<string>((resolve , reject)=>{
+  
+    var profileDoc = utils.getProfileDocumentLocation(webid);
+
+    this.fetcher.nowOrWhenFetched(profileDoc, undefined , (ok, body, xhr)=> {
+        if (!ok) {
+            console.log("Oops, something happened and couldn't fetch data");
+            reject(xhr.status);
+        } else {
+        let me = $rdf.sym(webid);
       
-  }
-
-  async getStorageLocation (webid:any): Promise<{}>
-  {
-    return  new Promise((resolve , reject)=>{
-  
-      var profileDoc = utils.getProfileDocumentLocation(webid);
-  
-      this.fetcher.nowOrWhenFetched(profileDoc, undefined , (ok, body, xhr)=> {
-          if (!ok) {
-              console.log("Oops, something happened and couldn't fetch data");
-              reject(xhr.status);
-          } else {
-          let me = $rdf.sym(webid);
-        
-          var storage = $rdf.sym('http://www.w3.org/ns/pim/space#storage');
-          var strg = this.rdf.store.any(me, storage);
-            console.log(strg);
-                resolve(strg.uri);         }     
-            }); 
-    });
+        var storage = $rdf.sym('http://www.w3.org/ns/pim/space#storage');
+        var strg = this.rdf.store.any(me, storage);
+        //  console.log(strg);
+              resolve(strg.uri);         }     
+          }); 
+  });
     
-     
   }
 
-  createNewChat(location:string){
-    //let useWorkspace = this.getStorageLocation(this.session.webId) + this.publicStorage+containers.rootContainer+this.testWorkspace;
-    var newInstance = this.store.sym(location + '/index.ttl#this')
+  createNewChat(loc:string){
+    var newInstance = this.store.sym(loc + '/index.ttl#this')
     var newChatDoc = newInstance.doc()
 
     this.store.add(newInstance, this.ns.rdf('type'), this.ns.meeting('Chat'), newChatDoc)
@@ -220,8 +232,88 @@ export class PodHandlerService {
   /**
    * Get a list of workspaces
    */
-  getWorkSpaces(){
-
+ async getListWorkSpaces() {
+  let workspaces:{}
+ 
+    
+// note url must end with a /
+    const appdataUrl =  this.storageLocation + this.publicStorage+"/"+containers.rootContainer+"/";
+  //  console.log("Appurl "+appdataUrl)
+    let wklist = []
+    let appstore = this.store.sym(appdataUrl)
+  await this.getFolderItems(this.store,appstore)
+    .then(value =>{
+      workspaces = value;
+    })       
+  return workspaces
   }
+
+
+   async getFolderItems(graph:any,subject:string) {
+   
+    let contains = {
+        folders : [],
+        files   : []
+     } 
+ 
+     //load a folder and get the contents
+     let files=[]
+    await  this.fetcher.load(subject).then(() => {
+        // get the folder contents
+       files = this.store.match(subject, this.ns.ldp('contains')).concat(this.store.match(null, this.ns.rdf('type'), this.ns.ldp('container'), null)).map(st=>st.object)
+    
+    for(let i=0;i<files.length;i++){
+         var item = files[i];
+         var newItem: any = {}
+         newItem.type = this.getFileType(this.store, item.value )
+        
+     //    var stats = self.getStats(graph,item.value)
+     //    newItem.modified = stats.modified
+     //    newItem.size = stats.size
+     //    newItem.mtime = stats.mtime
+         newItem.label=decodeURIComponent(item.value).replace( /.*\//,'')
+         if(newItem.type==='folder'){
+              item.value = item.value.replace(/[/]+/g,'/');
+              item.value = item.value.replace(/https:/,'https:/');
+              var name = item.value.replace( /\/$/,'')
+              newItem.name = name.replace( /.*\//,'')
+              newItem.url  = item.value
+              contains.folders.push(newItem)
+         }
+         else {
+              newItem.url=item.value
+              newItem.name=item.value.replace(/.*\//,'')
+      // if(newItem.name==='index.html') self.hasIndexHtml=true
+              contains.files.push(newItem)
+         }
+    }
+
+  
+  return contains;
+  }).catch(err=>{
+    console.log(err)
+  })  
+
+ return contains;
+}
+
+getFileType = ( graph, url )=>{
+  
+  var subj = this.store.sym(url)
+  var pred=this.store.sym(this.ns.rdf('type'))
+  var type = graph.any(subj,pred,undefined)
+ 
+      let regexContainer = new RegExp("ldp#BasicContainer")
+      let regexMediatype = new RegExp("http://www.w3.org/ns/iana/media-types/")
+    
+      if( regexContainer.test(type) )
+          return "folder"
+          
+      if(regexMediatype.test(type)){
+          type=type.replace("http://www.w3.org/ns/iana/media-types/",'')
+          return type.replace('#Resource','')
+      }
+  return "unknown"
+}
 
 }
