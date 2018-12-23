@@ -1,5 +1,5 @@
 import { currentSession } from 'solid-auth-client';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { AuthService } from '../services/solid.auth.service';
 import { RdfService } from '../services/rdf.service';
 import * as SolidFileClient from 'solid-file-client';
@@ -23,9 +23,11 @@ export class WelcomeComponent implements OnInit {
   fileClient = SolidFileClient;
   folderName: string;
   webId: string;
-  workspace: string;
   session: SolidSession;
   profileId:any
+  existingWorkspaces: string[]
+  @Input('workspace')  workspace: string;
+  @Output('onExistingWorkspaceChange') onExistingWorkspaceChange  = new EventEmitter<any[]>();
 
   
   
@@ -77,7 +79,11 @@ export class WelcomeComponent implements OnInit {
   getExistingWorkspaces=async()=>{
    await this.podhandler.getListWorkSpaces()
    .then(value =>{
-
+     if(typeof value === "object"){
+       this.existingWorkspaces = value.folders
+       this.onExistingWorkspaceChange.emit()
+     }
+        
     // do something with the workspaces
       console.log("Workspaces: "+JSON.stringify(value))
    })

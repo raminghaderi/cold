@@ -3,10 +3,10 @@ import { AuthService } from '../services/solid.auth.service'
 import { RdfService } from '../services/rdf.service'
 import * as SolidFileClient from 'solid-file-client'
 import * as utils from '../utils/utililties'
-import { SolidSession } from '../models/solid-session.model';
+import { SolidSession } from '../models/solid-session.model'
 import containers from '../containers.json'
 
-import solidnamespace from 'solid-namespace';
+import solidnamespace from 'solid-namespace'
 
 declare let $rdf: any;
 
@@ -232,7 +232,7 @@ export class PodHandlerService {
   /**
    * Get a list of workspaces
    */
- async getListWorkSpaces() {
+ async getListWorkSpaces(): Promise<any> {
   let workspaces:{}
  
     
