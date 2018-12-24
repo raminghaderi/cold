@@ -5,11 +5,6 @@ import { ActivatedRoute } from '@angular/router';
 // Services
 import { AuthService } from '../services/solid.auth.service';
 
-class Session {
-  constructor() {}
-
-  webId: string;
-}
 
 @Component({
   selector: 'app-dashboard',
@@ -17,12 +12,13 @@ class Session {
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  session: Session = new Session();
+  friends = ['Ramin', 'Samuel', 'Zahra'];
+  spaces = ['general', 'survey', 'credentials'];
+  workspaces = ['planspiel', 'solid', 'kubernetes'];
 
   constructor(private auth: AuthService, private route: ActivatedRoute) {}
 
   ngOnInit() {
-    console.log('hello');
     this.loadSession();
   }
 
@@ -30,7 +26,7 @@ export class DashboardComponent implements OnInit {
     // this.session = await currentSession();
   }
 
-  onSignOut = () => {
+  logout() {
     this.auth.solidSignOut();
   }
 
