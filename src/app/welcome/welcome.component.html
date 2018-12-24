@@ -16,15 +16,21 @@
         <p><b>CO</b>llaboration based on <b>L</b>ink <b>D</b>ata</p>
         <div class="input-group mb-3">
             <div class="input-group-prepend">
-              <span class="input-group-text" id="basic-addon3">{{webId}}</span>
+              <span class="input-group-text" id="basic-addon3">{{workspace}}</span>
             </div>
-            <input type="text" [(ngModel)]="folderName" class="form-control" id="basic-url" aria-describedby="basic-addon3" required>
+            <input type="text" [(ngModel)]="folderName"  [disabled]="!workspace" class="form-control" id="basic-url" aria-describedby="basic-addon3" required>
         </div>
-        <button type="button" (click)="createFolder()" [disabled]="!folderName" class="btn btn-primary btn-lg btn-block my-3">Create a workspace</button>
+        <button type="button" (click)=" initWorkspace()" [disabled]="!folderName" class="btn btn-primary btn-lg btn-block my-3">Create a workspace</button>
     
         <div class="input-group mb-3">
             <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
         </div>
         <button type="button" class="btn btn-secondary btn-lg btn-block my-3">Join a workspace</button>
+        <br>
+        <h1>Your Workspaces</h1>
+        <ul class="list-group">
+          <!--TO DO: Make it a link -->
+          <li class="list-group-item" *ngFor="let wkspace of existingWorkspaces">{{ wkspace.name }}</li>
+        </ul>
     </div>
 </div>
