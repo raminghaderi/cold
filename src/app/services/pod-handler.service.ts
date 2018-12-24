@@ -45,13 +45,11 @@ export class PodHandlerService {
    this.webid = this.session.webId.split('profile')[0]
   this.me =  $rdf.sym(this.webid);
  
-   //this.storageLocation = await 
+   
    this.getStorageLocation(this.session.webId)
    .then(val=>{
      this.storageLocation = val;
     
-   //  if(this.storageLocation)
-      //  this.getListWorkSpaces()
    })
       
    })
@@ -238,7 +236,6 @@ export class PodHandlerService {
     
 // note url must end with a /
     const appdataUrl =  url+containers.rootContainer+"/";
-  //  console.log("Appurl "+appdataUrl)
     let wklist = []
     let appstore = this.store.sym(appdataUrl)
   await this.getFolderItems(this.store,appstore)
@@ -283,7 +280,6 @@ export class PodHandlerService {
          else {
               newItem.url=item.value
               newItem.name=item.value.replace(/.*\//,'')
-      // if(newItem.name==='index.html') self.hasIndexHtml=true
               contains.files.push(newItem)
          }
     }

@@ -66,10 +66,10 @@ export class WelcomeComponent implements OnInit {
   }
 
   // TODO: redirect to dashboard and 
-  getExistingWorkspaces=async()=>{
+  getExistingWorkspaces = async() => {
    await this.podhandler.getListWorkSpaces(this.workspace)
-   .then(value =>{
-     if(typeof value === "object"){
+   .then( value => {
+     if(typeof value === "object") {
        this.existingWorkspaces = value.folders
        this.onExistingWorkspaceChange.emit()
      }
