@@ -232,12 +232,12 @@ export class PodHandlerService {
   /**
    * Get a list of workspaces
    */
- async getListWorkSpaces(): Promise<any> {
+ async getListWorkSpaces(url): Promise<any> {
   let workspaces:{}
  
     
 // note url must end with a /
-    const appdataUrl =  this.storageLocation + this.publicStorage+"/"+containers.rootContainer+"/";
+    const appdataUrl =  url+containers.rootContainer+"/";
   //  console.log("Appurl "+appdataUrl)
     let wklist = []
     let appstore = this.store.sym(appdataUrl)
@@ -261,7 +261,7 @@ export class PodHandlerService {
     await  this.fetcher.load(subject).then(() => {
         // get the folder contents
        files = this.store.match(subject, this.ns.ldp('contains')).concat(this.store.match(null, this.ns.rdf('type'), this.ns.ldp('container'), null)).map(st=>st.object)
-    
+        
     for(let i=0;i<files.length;i++){
          var item = files[i];
          var newItem: any = {}

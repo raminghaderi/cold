@@ -25,7 +25,7 @@ export class WelcomeComponent implements OnInit {
   webId: string;
   session: SolidSession;
   profileId:any
-  existingWorkspaces: string[]
+  existingWorkspaces: any[];
   @Input('workspace')  workspace: string;
   @Output('onExistingWorkspaceChange') onExistingWorkspaceChange  = new EventEmitter<any[]>();
 
@@ -36,7 +36,7 @@ export class WelcomeComponent implements OnInit {
               private podhandler:PodHandlerService) { }
 
   ngOnInit() {
-    this.getSession()
+    this.getWebId()
    
     // Find a better way to call this function
     setTimeout(() => {
@@ -45,23 +45,13 @@ export class WelcomeComponent implements OnInit {
   
   }
 
-  getSession(){
-     this.auth.session.subscribe((val: SolidSession)=>{
-      this.session = val
-    this.profileId = this.session.webId
-    this.webId = this.session.webId.split('profile')[0]
-    this.initForm()
-  
-    })
+  getWebId = async function() {
 
-       
-  }
-
-  async initForm (){
-  let loc = await this.podhandler.getStorageLocation(this.profileId)
-     this.workspace = loc+''+'public/'
- 
-  }
+    const session = await solid.auth.currentSession();
+    this.webId = session.webId.split('profile')[0];
+    this.workspace = this.webId + 'public/';
+    
+  };
 
   logout() {
     this.auth.solidSignOut();
@@ -70,14 +60,14 @@ export class WelcomeComponent implements OnInit {
 
   initWorkspace() {
       let url = this.workspace + '' + this.folderName;
-      console.log(url);
+      
       // check if folder exists
       this.podhandler.initializeContainers(this.folderName);
   }
 
   // TODO: redirect to dashboard and 
   getExistingWorkspaces=async()=>{
-   await this.podhandler.getListWorkSpaces()
+   await this.podhandler.getListWorkSpaces(this.workspace)
    .then(value =>{
      if(typeof value === "object"){
        this.existingWorkspaces = value.folders
