@@ -1,6 +1,6 @@
 {
 	
-	 "rootContainer": "ColdAppData",
+	 "rootContainer": "cold",
 	 "subContainers": {
 		 "chatThreadsMetadataResource": {
 									"path":"ChatMetadata",
