@@ -25,6 +25,7 @@ export class DashboardComponent implements OnInit {
   webId: string;
   //friends = ['Ramin', 'Samuel', 'Zahra'];
   spaces = ['general', 'survey', 'credentials'];
+  friends=[]
 
   constructor(private auth: AuthService,
               private route: ActivatedRoute,
@@ -38,13 +39,24 @@ export class DashboardComponent implements OnInit {
   async loadProfile() {
     try {
       this.loadingProfile = true;
-      this.session = await solid.auth.currentSession();
-      this.webId = this.session.webId;
-      const profile = await this.rdf.getProfile(this.webId);
-      console.log(profile);
+      this.session = this.rdf.session;
+     // this.webId = this.session.webId;
+
+
+      const profile = await this.rdf.getProfile(this.rdf.session.webId);
+     
+       
       if (profile) {
-        this.profile = profile;
-        this.auth.saveOldUserData(profile);
+      this.profile = profile;
+        this.auth.saveOldUserData(profile); 
+          
+        // LoadFriends
+        for (let f=0; f<profile.friends.length; f++){
+         let friendProfile = await this.rdf.getProfile(profile.friends[f])
+         
+          console.log("Friend: "+JSON.stringify(profile.friends[f]))
+          this.friends.push(friendProfile)
+        }
       }
 
       this.loadingProfile = false;

@@ -4,9 +4,6 @@ import { NgForm } from '@angular/forms';
 import { SolidProfile } from '../models/solid-profile.model';
 import { RdfService } from '../services/rdf.service';
 import { AuthService } from '../services/solid.auth.service';
-import { SolidSession } from './../models/solid-session.model';
-
-declare let solid: any;
 
 
 @Component({
@@ -19,8 +16,6 @@ export class CardComponent implements OnInit  {
   profile: SolidProfile;
   profileImage: string;
   loadingProfile: Boolean;
-  session: SolidSession;
-  webId: string;
 
   @ViewChild('f') cardForm: NgForm;
 
@@ -39,11 +34,13 @@ export class CardComponent implements OnInit  {
   // Loads the profile from the rdf service and handles the response
   async loadProfile() {
     try {
+
+
       this.loadingProfile = true;
-      this.session = await solid.auth.currentSession();
-      this.webId = this.session.webId;
-      const profile = await this.rdf.getProfile(this.webId);
+      const profile = await this.rdf.getProfile(this.rdf.session.webId);
+    
       if (profile) {
+
         this.profile = profile;
         this.auth.saveOldUserData(profile);
       }

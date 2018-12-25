@@ -315,7 +315,7 @@ export class RdfService {
         image: this.getValueFromVcard('hasPhoto', webId),
         address: this.getAddress(webId),
         email: this.getEmail(webId),
-        friends: this.getValueFromFoaf('knows')
+        friends: this.getValueFromFoaf('knows',webId)
       };
     } catch (error) {
       console.log(`Error fetching data: ${error}`);
