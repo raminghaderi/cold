@@ -9,6 +9,7 @@ declare let $rdf: any;
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { forEach } from '@angular/router/src/utils/collection';
+import { WebAnimationsDriver } from '@angular/animations/browser/src/render/web_animations/web_animations_driver';
 
 const VCARD = $rdf.Namespace('http://www.w3.org/2006/vcard/ns#');
 const FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
@@ -261,8 +262,8 @@ export class RdfService {
     }
   };
 
-  getAddress = () => {
-    const linkedUri = this.getValueFromVcard('hasAddress');
+  getAddress = (webId?: string) => {
+    const linkedUri = this.getValueFromVcard('hasAddress', webId);
 
     if (linkedUri) {
       return {
@@ -277,8 +278,8 @@ export class RdfService {
   };
 
   //Function to get email. This returns only the first email, which is temporary
-  getEmail = () => {
-    const linkedUri = this.getValueFromVcard('hasEmail');
+  getEmail = (webId?: string) => {
+    const linkedUri = this.getValueFromVcard('hasEmail', webId);
 
     if (linkedUri) {
       return this.getValueFromVcard('value', linkedUri).split('mailto:')[1];
@@ -288,8 +289,8 @@ export class RdfService {
   }
 
   //Function to get phone number. This returns only the first phone number, which is temporary. It also ignores the type.
-  getPhone = () => {
-    const linkedUri = this.getValueFromVcard('hasTelephone');
+  getPhone = (webId?: string) => {
+    const linkedUri = this.getValueFromVcard('hasTelephone', webId);
 
     if(linkedUri) {
       return this.getValueFromVcard('value', linkedUri).split('tel:+')[1];
@@ -297,24 +298,24 @@ export class RdfService {
   };
 
 
-  getProfile = async () => {
+  getProfile = async (webId: string) => {
 
-    if (!this.session) {
+    /* if (!this.session) {
       await this.getSession();
-    }
+    } */
 
     try {
-      await this.fetcher.load(this.session.webId);
+      await this.fetcher.load(webId);
       //console.log(this.getValueFromFoaf('knows'));
       return {
-        fn : this.getValueFromFoaf('name'),
-        company : this.getValueFromVcard('organization-name'),
-        phone: this.getPhone(),
-        role: this.getValueFromVcard('role'),
-        image: this.getValueFromVcard('hasPhoto'),
-        address: this.getAddress(),
-        email: this.getEmail(),
-        friends: this.getValueFromFoaf('knows')
+        fn : this.getValueFromFoaf('name', webId),
+        company : this.getValueFromVcard('organization-name', webId),
+        phone: this.getPhone(webId),
+        role: this.getValueFromVcard('role', webId),
+        image: this.getValueFromVcard('hasPhoto', webId),
+        address: this.getAddress(webId),
+        email: this.getEmail(webId),
+        friends: this.getValueFromFoaf('knows', webId)
       };
     } catch (error) {
       console.log(`Error fetching data: ${error}`);
@@ -341,10 +342,10 @@ export class RdfService {
       var url;
       var test;
       store.forEach(friend => {
-        /* url = friend.object.value+"profile/card#me";
-        console.log(url);
-        test = this.getValueFromFoaf('name', url);
-        console.log(test); */
+        url = friend.object.value+"profile/card#me";
+        //this.getProfile(url);
+        //test = this.getValueFromFoaf('name', url);
+        //console.log(test);
         friends.push(friend.object.value);
       })
       //console.log(friends);

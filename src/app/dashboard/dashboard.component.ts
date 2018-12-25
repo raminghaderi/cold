@@ -1,3 +1,4 @@
+import { SolidSession } from './../models/solid-session.model';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 // import { currentSession } from 'solid-auth-client';
@@ -20,6 +21,8 @@ export class DashboardComponent implements OnInit {
   profile: SolidProfile;
   loadingProfile: Boolean;
   profileImage: string;
+  session: SolidSession;
+  webId: string;
   //friends = ['Ramin', 'Samuel', 'Zahra'];
   spaces = ['general', 'survey', 'credentials'];
 
@@ -35,7 +38,9 @@ export class DashboardComponent implements OnInit {
   async loadProfile() {
     try {
       this.loadingProfile = true;
-      const profile = await this.rdf.getProfile();
+      this.session = await solid.auth.currentSession();
+      this.webId = this.session.webId;
+      const profile = await this.rdf.getProfile(this.webId);
       console.log(profile);
       if (profile) {
         this.profile = profile;
