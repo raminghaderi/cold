@@ -6,6 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../services/solid.auth.service';
 import { RdfService } from '../services/rdf.service';
 import { SolidProfile } from '../models/solid-profile.model';
+import { PodHandlerService } from '../services/pod-handler.service';
 
 declare let solid: any;
 
@@ -19,12 +20,13 @@ export class DashboardComponent implements OnInit {
   profile: SolidProfile;
   loadingProfile: Boolean;
   profileImage: string;
-  friends = ['Ramin', 'Samuel', 'Zahra'];
+  //friends = ['Ramin', 'Samuel', 'Zahra'];
   spaces = ['general', 'survey', 'credentials'];
 
   constructor(private auth: AuthService,
               private route: ActivatedRoute,
-              private rdf: RdfService) {}
+              private rdf: RdfService,
+              private podHandler: PodHandlerService) {}
 
   ngOnInit() {
     this.loadProfile();

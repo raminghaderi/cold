@@ -1,3 +1,4 @@
+import { map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { SolidSession } from '../models/solid-session.model';
 declare let solid: any;
@@ -7,6 +8,7 @@ declare let $rdf: any;
 // TODO: Remove any UI interaction from this service
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { forEach } from '@angular/router/src/utils/collection';
 
 const VCARD = $rdf.Namespace('http://www.w3.org/2006/vcard/ns#');
 const FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
@@ -76,6 +78,9 @@ export class RdfService {
    * @return {string} The value of the fetched node or an emtpty string
    */
   getValueFromFoaf = (node: string, webId?: string) => {
+    if(node == 'knows') {
+      return this.getFriends(node, FOAF, webId);
+    }
     return this.getValueFromNamespace(node, FOAF, webId);
   };
  
@@ -291,6 +296,7 @@ export class RdfService {
     }
   };
 
+
   getProfile = async () => {
 
     if (!this.session) {
@@ -299,15 +305,16 @@ export class RdfService {
 
     try {
       await this.fetcher.load(this.session.webId);
-
+      //console.log(this.getValueFromFoaf('knows'));
       return {
-        fn : this.getValueFromVcard('fn'),
+        fn : this.getValueFromFoaf('name'),
         company : this.getValueFromVcard('organization-name'),
         phone: this.getPhone(),
         role: this.getValueFromVcard('role'),
         image: this.getValueFromVcard('hasPhoto'),
         address: this.getAddress(),
         email: this.getEmail(),
+        friends: this.getValueFromFoaf('knows')
       };
     } catch (error) {
       console.log(`Error fetching data: ${error}`);
@@ -327,4 +334,22 @@ export class RdfService {
     }
     return '';
   }
+
+  getFriends(node: string, namespace: any, webId?: string): string | any {
+    const store = this.store.match($rdf.sym(webId || this.session.webId), namespace(node));
+      var friends = [];
+      var url;
+      var test;
+      store.forEach(friend => {
+        /* url = friend.object.value+"profile/card#me";
+        console.log(url);
+        test = this.getValueFromFoaf('name', url);
+        console.log(test); */
+        friends.push(friend.object.value);
+      })
+      //console.log(friends);
+      return friends;
+  }
 }
+
+

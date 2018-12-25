@@ -312,4 +312,8 @@ getFileType = ( graph, url )=>{
   return "unknown"
 }
 
+getFriends() {
+  
+}
+
 }
