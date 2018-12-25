@@ -315,7 +315,7 @@ export class RdfService {
         image: this.getValueFromVcard('hasPhoto', webId),
         address: this.getAddress(webId),
         email: this.getEmail(webId),
-        friends: this.getValueFromFoaf('knows', webId)
+        friends: this.getFriends('knows', FOAF, webId)
       };
     } catch (error) {
       console.log(`Error fetching data: ${error}`);
@@ -339,18 +339,23 @@ export class RdfService {
   getFriends(node: string, namespace: any, webId?: string): string | any {
     const store = this.store.match($rdf.sym(webId || this.session.webId), namespace(node));
       var friends = [];
-      var url;
       var test;
-      store.forEach(friend => {
-        url = friend.object.value+"profile/card#me";
-        //this.getProfile(url);
+      store.forEach(async (friend) => {
+        let url = friend.object.value+"profile/card#me";
+        //let profile = await this.getProfile(url);
         //test = this.getValueFromFoaf('name', url);
-        //console.log(test);
+        //console.log(profile.fn);
         friends.push(friend.object.value);
       })
       //console.log(friends);
       return friends;
   }
+
+  getFriendProfile(){
+
+
+  }
+
 }
 
 

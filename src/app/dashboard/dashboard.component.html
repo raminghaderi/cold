@@ -25,15 +25,15 @@
         </ul>
         <p><b>Add Space</b></p>
         <h5>Friends</h5>
-        <ul>
-          <li *ngFor="let friend of profile.friends">{{friend}}</li>
+        <ul *ngIf="profile">
+          <li *ngFor="let friend of profile.friends">{{friend.name}}</li>
         </ul>
       </div>
       <div class="userInfo">
-        <div class="profile-image-container">
+        <div class="profile-image-container" *ngIf="profile" >
             <img width="32" height="32" [src]="profileImage" style="border-radius: 50%;">
         </div>
-        <div>{{profile.fn}}</div>
+        <div *ngIf="profile">{{profile.fn}}</div>
       </div>
     </div>
     <div class="content">
