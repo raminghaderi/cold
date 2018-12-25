@@ -5,6 +5,8 @@ import { ActivatedRoute } from '@angular/router';
 // Services
 import { AuthService } from '../services/solid.auth.service';
 
+declare let solid: any;
+
 
 @Component({
   selector: 'app-dashboard',
@@ -14,20 +16,27 @@ import { AuthService } from '../services/solid.auth.service';
 export class DashboardComponent implements OnInit {
   friends = ['Ramin', 'Samuel', 'Zahra'];
   spaces = ['general', 'survey', 'credentials'];
-  workspaces = ['planspiel', 'solid', 'kubernetes'];
+  webId: string;
 
   constructor(private auth: AuthService, private route: ActivatedRoute) {}
 
   ngOnInit() {
-    this.loadSession();
+    this.getWebId();
   }
 
-  loadSession = async () => {
-    // this.session = await currentSession();
-  }
+  getWebId = async function() {
+
+    const session = await solid.auth.currentSession();
+    this.webId = session.webId.split('profile')[0];
+    console.log(this.webId);  
+  };
 
   logout() {
     this.auth.solidSignOut();
+  }
+
+  send() {
+
   }
 
 }

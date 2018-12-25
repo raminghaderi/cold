@@ -59,7 +59,7 @@ const routes: Routes = [
   {
     path: 'longchat',
     component: LongchatComponent
-  }
+  },
 ];
 
 @NgModule({
