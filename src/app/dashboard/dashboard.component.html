@@ -30,8 +30,10 @@
         </ul>
       </div>
       <div class="userInfo">
-        <img width="32" height="32" src="../../assets/images/profile.png">
-        <div>{{webId}}</div>
+        <div class="profile-image-container">
+            <img width="32" height="32" [src]="profileImage" style="border-radius: 50%;">
+        </div>
+        <div>{{profile.fn}}</div>
       </div>
     </div>
     <div class="content">

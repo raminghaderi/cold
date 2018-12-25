@@ -4,6 +4,8 @@ import { ActivatedRoute } from '@angular/router';
 
 // Services
 import { AuthService } from '../services/solid.auth.service';
+import { RdfService } from '../services/rdf.service';
+import { SolidProfile } from '../models/solid-profile.model';
 
 declare let solid: any;
 
@@ -14,22 +16,45 @@ declare let solid: any;
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
+  profile: SolidProfile;
+  loadingProfile: Boolean;
+  profileImage: string;
   friends = ['Ramin', 'Samuel', 'Zahra'];
   spaces = ['general', 'survey', 'credentials'];
-  webId: string;
 
-  constructor(private auth: AuthService, private route: ActivatedRoute) {}
+  constructor(private auth: AuthService,
+              private route: ActivatedRoute,
+              private rdf: RdfService) {}
 
   ngOnInit() {
-    this.getWebId();
+    this.loadProfile();
   }
 
-  getWebId = async function() {
+  async loadProfile() {
+    try {
+      this.loadingProfile = true;
+      const profile = await this.rdf.getProfile();
+      console.log(profile);
+      if (profile) {
+        this.profile = profile;
+        this.auth.saveOldUserData(profile);
+      }
 
-    const session = await solid.auth.currentSession();
-    this.webId = session.webId.split('profile')[0];
-    console.log(this.webId);  
-  };
+      this.loadingProfile = false;
+      this.setupProfileData();
+    } catch (error) {
+      console.log(`Error: ${error}`);
+    }
+
+  }
+
+  private setupProfileData() {
+    if (this.profile) {
+      this.profileImage = this.profile.image ? this.profile.image : '/assets/images/profile.png';
+    } else {
+      this.profileImage = '/assets/images/profile.png';
+    }
+  }
 
   logout() {
     this.auth.solidSignOut();
