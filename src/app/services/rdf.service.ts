@@ -315,7 +315,7 @@ export class RdfService {
         image: this.getValueFromVcard('hasPhoto', webId),
         address: this.getAddress(webId),
         email: this.getEmail(webId),
-        friends: this.getFriends('knows', FOAF, webId)
+        friends: this.getValueFromFoaf('knows')
       };
     } catch (error) {
       console.log(`Error fetching data: ${error}`);
@@ -342,9 +342,9 @@ export class RdfService {
       var test;
       store.forEach(async (friend) => {
         let url = friend.object.value+"profile/card#me";
-        //let profile = await this.getProfile(url);
+       // let profile = await this.getProfile(url);
         //test = this.getValueFromFoaf('name', url);
-        //console.log(profile.fn);
+      //  console.log(JSON.stringify(profile));
         friends.push(friend.object.value);
       })
       //console.log(friends);
