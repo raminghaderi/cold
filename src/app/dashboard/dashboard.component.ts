@@ -39,11 +39,11 @@ export class DashboardComponent implements OnInit {
   async loadProfile() {
     try {
       this.loadingProfile = true;
-      this.session = this.rdf.session;
-     // this.webId = this.session.webId;
+      this.session =  await solid.auth.currentSession();
+      this.webId = this.session.webId;
 
 
-      const profile = await this.rdf.getProfile(this.rdf.session.webId);
+      const profile = await this.rdf.getProfile(this.webId);
      
        
       if (profile) {
@@ -54,7 +54,6 @@ export class DashboardComponent implements OnInit {
         for (let f=0; f<profile.friends.length; f++){
          let friendProfile = await this.rdf.getProfile(profile.friends[f])
          
-          console.log("Friend: "+JSON.stringify(profile.friends[f]))
           this.friends.push(friendProfile)
         }
       }

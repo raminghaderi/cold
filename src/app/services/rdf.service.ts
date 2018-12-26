@@ -351,10 +351,7 @@ export class RdfService {
       return friends;
   }
 
-  getFriendProfile(){
 
-
-  }
 
 }
 
