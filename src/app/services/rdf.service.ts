@@ -310,17 +310,17 @@ export class RdfService {
     }
 
     try {
-      await this.fetcher.load(webId);
+      await this.fetcher.load(url);
       //console.log(this.getValueFromFoaf('knows'));
       return {
-        fn : this.getValueFromFoaf('name', webId),
-        company : this.getValueFromVcard('organization-name', webId),
-        phone: this.getPhone(webId),
-        role: this.getValueFromVcard('role', webId),
-        image: this.getValueFromVcard('hasPhoto', webId),
-        address: this.getAddress(webId),
-        email: this.getEmail(webId),
-        friends: this.getValueFromFoaf('knows',webId)
+        fn : this.getValueFromFoaf('name', url),
+        company : this.getValueFromVcard('organization-name', url),
+        phone: this.getPhone(url),
+        role: this.getValueFromVcard('role', url),
+        image: this.getValueFromVcard('hasPhoto', url),
+        address: this.getAddress(url),
+        email: this.getEmail(url),
+        friends: this.getValueFromFoaf('knows',url)
       };
     } catch (error) {
       console.log(`Error fetching data: ${error}`);

@@ -59,7 +59,6 @@ export class DashboardComponent implements OnInit {
         // LoadFriends
         for (let f=0; f<profile.friends.length; f++){
          let friendProfile = await this.rdf.getProfile(profile.friends[f])
-         
           this.friends.push(friendProfile)
         }
       }
