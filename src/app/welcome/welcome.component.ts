@@ -7,6 +7,8 @@ import { PodHandlerService } from '../services/pod-handler.service';
 import { SolidSession } from '../models/solid-session.model';
 import { Observable } from 'rxjs';
 
+import CONTAINERS from '../containers.json'
+
 //const filedc = require('solid-file-client');
 
 declare let solid: any;
@@ -26,6 +28,8 @@ export class WelcomeComponent implements OnInit {
   session: SolidSession;
   profileId:any
   existingWorkspaces: any[];
+  appRootDir:string=CONTAINERS.rootContainer
+
   @Input('workspace')  workspace: string;
   @Output('onExistingWorkspaceChange') onExistingWorkspaceChange  = new EventEmitter<any[]>();
 

@@ -8,7 +8,18 @@ export function  getProfileDocumentLocation (webid) {
 	return "";
 };
 
-var removeDuplicateSlashInURL = function(url) {
+export function getProfileUrl(webid: string):string{
+	let regexCardMe = new RegExp("profile/card#me")
+	
+	if( regexCardMe.test(webid) )
+	return webid
+
+	else
+
+	return removeDuplicateSlashInURL(webid) + "profile/card#me"
+}
+
+export function removeDuplicateSlashInURL(url) {
 
 	var urlPath = url;
 	var protocol = "";
@@ -38,7 +49,7 @@ var removeDuplicateSlashInURL = function(url) {
 	return protocol + newComps.join("/");
 };
 
-var timestampToDate = function(timestamp) {
+export function timestampToDate(timestamp) {
 	var a = new Date(timestamp * 1000);
 	  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 	  var year = a.getFullYear();
@@ -47,7 +58,7 @@ var timestampToDate = function(timestamp) {
 	  var hour = a.getHours();
 	  var min = a.getMinutes();
 	  var sec = a.getSeconds();
-	  var time = date + ' ' + month + ' 2016 ' + hour + ':' + min + ':' + sec ;
+	  var time = date + ' ' + month + year + hour + ':' + min + ':' + sec ;
 	  return time;
 };
 
@@ -60,6 +71,6 @@ var friendlyWebid = function(webid) {
 			.split('.').join("");
 };
 
-var getRandomIntInclusive = function (min, max) {
+export function getRandomIntInclusive(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };

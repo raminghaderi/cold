@@ -21,7 +21,7 @@
       <div class="spaces">
         <h5>Spaces</h5>
         <ul>
-          <li *ngFor="let space of spaces">{{space}}</li>
+          <li *ngFor="let space of existingWorkspaces" (click)="setActiveWS(space.name)">{{space.name}} </li>
         </ul>
         <p><b>Add Space</b></p>
         <h5>Friends</h5>
@@ -42,12 +42,15 @@
         <div>members:12 </div>
       </div>
       <div class="chat">
-        this is a chat block
+       <ul>
+         <li  *ngFor="let msg of messagesList">{{msg.msg}} </li>
+       </ul>
+    
       </div>
       <div class="sendText">
         <button>+</button>
-        <input type="text" placeholder="Message">
-        <button (click)="send()">Send</button>
+        <input type="text" placeholder="Message" #messageBox >
+        <button (click)="send(messageBox.value)">Send</button>
       </div>
     </div>
   </div>

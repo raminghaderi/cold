@@ -4,7 +4,7 @@ import { RdfService } from '../services/rdf.service'
 import * as SolidFileClient from 'solid-file-client'
 import * as utils from '../utils/utililties'
 import { SolidSession } from '../models/solid-session.model'
-import containers from '../containers.json'
+import CONTAINERS from '../containers.json'
 
 import solidnamespace from 'solid-namespace'
 
@@ -25,7 +25,6 @@ export class PodHandlerService {
   activeWorkspace:any
   existingWorkspaces:any[]
   storageLocation:string
-
  
 
   readonly publicStorage = "public"
@@ -104,8 +103,8 @@ export class PodHandlerService {
 
 }
 
- async defaultAppContainerUrl (): Promise<string>{
-   return this.storageLocation+ this.publicStorage +"/"+containers.rootContainer
+  defaultAppContainerUrl (): string{
+   return this.storageLocation+ this.publicStorage +"/"+CONTAINERS.rootContainer
     
   } 
 
@@ -122,7 +121,7 @@ export class PodHandlerService {
              var parentDir = this.storageLocation + this.publicStorage;
              
           // create root container for app data
-      await    this.createContainer(parentDir,containers.rootContainer)
+      await    this.createContainer(parentDir,CONTAINERS.rootContainer)
       .then(url0=>{
 
 
@@ -132,17 +131,17 @@ export class PodHandlerService {
         //TODO: check here if the error code is 404 
       } )
       
-     parentDir +="/"+containers.rootContainer
+     parentDir +="/"+CONTAINERS.rootContainer
         // Create provided workspace container
       await  this.createContainer(parentDir,foldername)
       .then(workspace=>{ 
        parentDir = ''+workspace
          //containers definition is loaded. Now time to ensure containers exists
-     for (var key in containers.subContainers)
+     for (var key in CONTAINERS.subContainers)
      {
        (async (k)=> {
        
-       let value = containers.subContainers[k];
+       let value = CONTAINERS.subContainers[k];
        let resType = (typeof value === "object")? "resource" : "container";
        
        let resPath = "";
@@ -173,13 +172,17 @@ export class PodHandlerService {
       })
               
 
-          if(isNew) 
-            await this.createNewChat(parentDir) 
+          if(isNew) {
+             await this.createNewChat(parentDir) 
+             // create chat store file
+             this.createFile(parentDir+'/chats.ttl')
+          }
+           
 
   }
 
-   getStorageLocation = async(webid:any)=>
-  {  
+   getStorageLocation = (webid:any)=> {  
+    
     return  new Promise<string>((resolve , reject)=>{
   
     var profileDoc = utils.getProfileDocumentLocation(webid);
@@ -200,16 +203,24 @@ export class PodHandlerService {
     
   }
 
-  createNewChat(loc:string){
-    var newInstance = this.store.sym(loc + '/index.ttl#this')
-    var newChatDoc = newInstance.doc()
+  createFile(file:string){
 
-    this.store.add(newInstance, this.ns.rdf('type'), this.ns.meeting('Chat'), newChatDoc)
+    //updateFile used because it deletes existing file and creates new
+    this.fileClient.createFile( file ).then( success => {
+      console.log( `Updated ${file}.`)
+  }, err => console.log(err) );
+  }
+
+  createNewChat(loc:string){
+    // index.ttl holds chat preferences
+    let newInstance = this.store.sym(loc + '/index.ttl#this')
+    let newChatDoc = newInstance.doc()
+
+    this.store.add(newInstance, this.ns.rdf('type'), this.ns.meeting('LongChat'), newChatDoc)
     this.store.add(newInstance, this.ns.dc('title'), 'Chat', newChatDoc)
     this.store.add(newInstance, this.ns.dc('created'), new Date(), newChatDoc)
     
       this.store.add(newInstance, this.ns.dc('author'), this.me, newChatDoc)
-  
 
     return new Promise( (resolve, reject)=> {
       this.updater.put(
@@ -220,10 +231,12 @@ export class PodHandlerService {
           if (ok) {
             resolve(uri2)
           } else {
-            reject(new Error('FAILED to save new tool at: ' + uri2 + ' : ' +
+            reject(new Error('FAILED to save new resource at: ' + uri2 + ' : ' +
               message))
           };
         })
+
+
     })
   }
 
@@ -235,7 +248,7 @@ export class PodHandlerService {
  
     
 // note url must end with a /
-    const appdataUrl =  url+containers.rootContainer+"/";
+    const appdataUrl =  url +"/"+CONTAINERS.rootContainer;
     let wklist = []
     let appstore = this.store.sym(appdataUrl)
   await this.getFolderItems(this.store,appstore)
@@ -245,8 +258,25 @@ export class PodHandlerService {
   return workspaces
   }
 
+  getFileContent = async (file:string)=>{
 
-   async getFolderItems(graph:any,subject:string) {
+    let contents=[]
+
+  return  await  this.fetcher.load(file).then((response) => {
+      // get the folder contents
+     contents = this.store.match(this.store.sym(file), undefined,undefined)
+      
+  console.log(contents)
+  
+return contents;
+},err=>{
+  console.log(err)
+})  
+
+  }
+
+
+    getFolderItems = async (graph:any,subject:string)=>{
    
     let contains = {
         folders : [],
@@ -257,7 +287,8 @@ export class PodHandlerService {
      let files=[]
     await  this.fetcher.load(subject).then(() => {
         // get the folder contents
-       files = this.store.match(subject, this.ns.ldp('contains')).concat(this.store.match(null, this.ns.rdf('type'), this.ns.ldp('container'), null)).map(st=>st.object)
+       files = this.store.match(subject, this.ns.ldp('contains'))
+       .concat(this.store.match(null, this.ns.rdf('type'), this.ns.ldp('container'), null)).map(st=>st.object)
         
     for(let i=0;i<files.length;i++){
          var item = files[i];
@@ -306,14 +337,80 @@ getFileType = ( graph, url )=>{
           return "folder"
           
       if(regexMediatype.test(type)){
-          type=type.replace("http://www.w3.org/ns/iana/media-types/",'')
+          type = type.replace("http://www.w3.org/ns/iana/media-types/",'')
           return type.replace('#Resource','')
       }
   return "unknown"
 }
 
-getFriends() {
-  
+//TODO: Load Messages in a workspace
+
+
+
+//subject is the directory
+// messageStore is subject.doc()
+sendMessage = async(subject:string,chatfile:any,msg:string)=>{
+ 
+    var sts = []
+    var now = new Date()
+    var timestamp = '' + now.getTime()
+    var dateStamp = $rdf.term(now)
+
+    subject = this.store.sym(subject)
+    let chatdoc = this.store.sym(chatfile)
+    let messageStore = chatdoc.doc()
+    // http://www.w3schools.com/jsref/jsref_obj_date.asp
+    var message = this.store.sym(messageStore.uri + '#' + 'Msg' + timestamp)
+
+    sts.push(new $rdf.Statement(subject, this.ns.wf('message'), message, messageStore))
+    // sts.push(new $rdf.Statement(message, ns.dc('title'), kb.literal(titlefield.value), messageStore))
+    sts.push(new $rdf.Statement(message, this.ns.sioc('content'), this.store.literal(msg), messageStore)) 
+       
+    sts.push(new $rdf.Statement(message, this.ns.dc('created'), dateStamp, messageStore))
+    if (this.me) sts.push(new $rdf.Statement(message, this.ns.foaf('maker'), this.me, messageStore))
+ 
+    var sendComplete = function (uri, success, body) {
+
+      if (!success) {
+      console.log("Error message")
+      return false
+      } else {
+        return true
+      }
+    }
+   
+   this.updater.update([], sts, sendComplete)
+
 }
+
+// create chat document
+getChatDocument(wkspace):any {
+let defaultContainer = this.defaultAppContainerUrl()
+
+//TODO: check if owner or not and return link 
+
+ 
+return defaultContainer + "/" + wkspace +"/chats.ttl"
+}
+
+getIndexfile(workspace:string):string{
+  let defaultContainer = this.defaultAppContainerUrl()
+
+//TODO: check if owner or not and return link 
+
+  return defaultContainer + "/" + workspace +"/index.ttl"
+}
+
+loadResource = async (url:string):Promise<boolean>=>{
+    
+ return await this.fetcher.load(url).then(response => {
+ return true
+}, err => {
+ return false
+});
+ 
+}
+
+
 
 }

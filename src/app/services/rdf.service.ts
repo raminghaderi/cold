@@ -8,8 +8,6 @@ declare let $rdf: any;
 // TODO: Remove any UI interaction from this service
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { forEach } from '@angular/router/src/utils/collection';
-import { WebAnimationsDriver } from '@angular/animations/browser/src/render/web_animations/web_animations_driver';
 
 const VCARD = $rdf.Namespace('http://www.w3.org/2006/vcard/ns#');
 const FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/');
@@ -303,6 +301,13 @@ export class RdfService {
     /* if (!this.session) {
       await this.getSession();
     } */
+    let url;
+
+    if(webId.includes('card#me')) {
+      url = webId;
+    } else {
+      url = webId+'/profile/card#me';
+    }
 
     try {
       await this.fetcher.load(webId);
@@ -341,10 +346,6 @@ export class RdfService {
       var friends = [];
       var test;
       store.forEach(async (friend) => {
-        let url = friend.object.value+"profile/card#me";
-       // let profile = await this.getProfile(url);
-        //test = this.getValueFromFoaf('name', url);
-      //  console.log(JSON.stringify(profile));
         friends.push(friend.object.value);
       })
       //console.log(friends);
