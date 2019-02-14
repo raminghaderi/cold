@@ -132,7 +132,6 @@ this.subscribe(subject.doc(),this.syncMessages)
     stored['uri'] = m
    stored['msg'] = msg.value
    return stored
-  
   })
 
   this.messagesList = messages;
