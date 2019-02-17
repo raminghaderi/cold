@@ -1,7 +1,66 @@
-<div class="dashboard">
-  <p>Your webId is {{ session.webId }}</p>
-  <ul>
-    <li><a [routerLink]="['/card']">Profile</a></li>
-    <li><a (click)="onSignOut()">Signout</a></li>
-  </ul>
+<div class="wrapper">
+  <div class="sider">
+      <div class="workspace">
+          <p><b>Amazon Web Service</b></p>
+          <p>This workspace is created by Ramin Ghaderi on 12.11.2018</p>
+      </div>
+      <div class="spaces">
+          <p><b>Spaces</b></p>
+          <div class="spaces-wrapper">
+              <ul class="space-ul">
+                  <li *ngFor="let space of existingWorkspaces" (click)="setActiveWS(space.name)"># {{space.name}}</li>
+              </ul>
+          </div>
+      </div>
+      <div class="friends">
+          <p><b>Friends</b></p>
+          <div class="friends-wrapper">
+              <ul class="space-ul">
+                  <li *ngFor="let friend of friends">{{friend.fn}}</li>
+              </ul>
+          </div>
+      </div>
+      <div class="user-profile">
+          <img [src]="profileImage" height="45" width="45" style="border-radius: 50%;">
+          <div *ngIf="profile"><p><b>{{profile.fn}}</b></p></div>
+      </div>
+  </div>
+  <div class="main">
+      <div class="main-navbar">
+          <div class="space-des">
+              <h4>#AWS-internal</h4>
+              <p>This space created on 01.02.2019</p>
+              <p>15 members</p>
+          </div>
+          <div class="logout">
+            <a (click)="logout()" style="cursor: pointer;">Logout</a>
+          </div>
+      </div>
+      <div class= "chat-area">
+          <div class="chat-area-wrapper">
+              <div class="message" *ngFor="let msg of messagesList">
+                  <div class="sender-img">
+                      <img [src]="profileImage" height="40" width="40">
+                  </div>
+                  <div class="sender-name">
+                      <div *ngIf="profile"><p><b>{{profile.fn}}</b></p></div>
+                  </div>
+                  <div class="sender-msg">
+                      <p>{{msg.msg}}</p>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="sender-msg-area">
+          <div class="upload-file">
+              <p><b>+</b></p>
+          </div>
+          <div class="user-msg">
+              <input type="text" placeholder="Message..." #messageBox/>
+          </div>
+          <div class="send">
+              <button (click)="send(messageBox.value)" style="border:none;">Send</button>
+          </div>
+      </div>
+  </div>
 </div>

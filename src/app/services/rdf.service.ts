@@ -1,3 +1,4 @@
+import { map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { SolidSession } from '../models/solid-session.model';
 declare let solid: any;
@@ -76,6 +77,9 @@ export class RdfService {
    * @return {string} The value of the fetched node or an emtpty string
    */
   getValueFromFoaf = (node: string, webId?: string) => {
+    if(node == 'knows') {
+      return this.getFriends(node, FOAF, webId);
+    }
     return this.getValueFromNamespace(node, FOAF, webId);
   };
  
@@ -256,8 +260,8 @@ export class RdfService {
     }
   };
 
-  getAddress = () => {
-    const linkedUri = this.getValueFromVcard('hasAddress');
+  getAddress = (webId?: string) => {
+    const linkedUri = this.getValueFromVcard('hasAddress', webId);
 
     if (linkedUri) {
       return {
@@ -272,8 +276,8 @@ export class RdfService {
   };
 
   //Function to get email. This returns only the first email, which is temporary
-  getEmail = () => {
-    const linkedUri = this.getValueFromVcard('hasEmail');
+  getEmail = (webId?: string) => {
+    const linkedUri = this.getValueFromVcard('hasEmail', webId);
 
     if (linkedUri) {
       return this.getValueFromVcard('value', linkedUri).split('mailto:')[1];
@@ -283,31 +287,40 @@ export class RdfService {
   }
 
   //Function to get phone number. This returns only the first phone number, which is temporary. It also ignores the type.
-  getPhone = () => {
-    const linkedUri = this.getValueFromVcard('hasTelephone');
+  getPhone = (webId?: string) => {
+    const linkedUri = this.getValueFromVcard('hasTelephone', webId);
 
     if(linkedUri) {
       return this.getValueFromVcard('value', linkedUri).split('tel:+')[1];
     }
   };
 
-  getProfile = async () => {
 
-    if (!this.session) {
+  getProfile = async (webId: string) => {
+
+    /* if (!this.session) {
       await this.getSession();
+    } */
+    let url;
+
+    if(webId.includes('card#me')) {
+      url = webId;
+    } else {
+      url = webId+'/profile/card#me';
     }
 
     try {
-      await this.fetcher.load(this.session.webId);
-
+      await this.fetcher.load(url);
+      //console.log(this.getValueFromFoaf('knows'));
       return {
-        fn : this.getValueFromVcard('fn'),
-        company : this.getValueFromVcard('organization-name'),
-        phone: this.getPhone(),
-        role: this.getValueFromVcard('role'),
-        image: this.getValueFromVcard('hasPhoto'),
-        address: this.getAddress(),
-        email: this.getEmail(),
+        fn : this.getValueFromFoaf('name', url),
+        company : this.getValueFromVcard('organization-name', url),
+        phone: this.getPhone(url),
+        role: this.getValueFromVcard('role', url),
+        image: this.getValueFromVcard('hasPhoto', url),
+        address: this.getAddress(url),
+        email: this.getEmail(url),
+        friends: this.getValueFromFoaf('knows',url)
       };
     } catch (error) {
       console.log(`Error fetching data: ${error}`);
@@ -327,4 +340,20 @@ export class RdfService {
     }
     return '';
   }
+
+  getFriends(node: string, namespace: any, webId?: string): string | any {
+    const store = this.store.match($rdf.sym(webId || this.session.webId), namespace(node));
+      var friends = [];
+      var test;
+      store.forEach(async (friend) => {
+        friends.push(friend.object.value);
+      })
+      //console.log(friends);
+      return friends;
+  }
+
+
+
 }
+
+

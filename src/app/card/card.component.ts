@@ -34,9 +34,13 @@ export class CardComponent implements OnInit  {
   // Loads the profile from the rdf service and handles the response
   async loadProfile() {
     try {
+
+
       this.loadingProfile = true;
-      const profile = await this.rdf.getProfile();
+      const profile = await this.rdf.getProfile(this.rdf.session.webId);
+    
       if (profile) {
+
         this.profile = profile;
         this.auth.saveOldUserData(profile);
       }

@@ -110,7 +110,7 @@ export class LongchatComponent implements OnInit {
     })*/
   }
 
-  render(uri, dom){
+  render(uri, dom) {
 
     let subject = this.kb.sym(uri);
      /* Preferences
