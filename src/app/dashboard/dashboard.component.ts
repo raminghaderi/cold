@@ -58,7 +58,6 @@ export class DashboardComponent implements OnInit {
       this.loadingProfile = true;
       this.session =  await solid.auth.currentSession();
       this.profileId = this.session.webId;
-      console.log(this.profileId)
       this.webId = this.profileId.split('/profile')[0];
 
       const profile = await this.rdf.getProfile(this.profileId);
@@ -145,7 +144,6 @@ syncMessages= async ()=> {
 // get references to the index.ttl and chat.ttl files and load to store
 
 let indexDoc = this.workingIndex()+"#this"
-console.log ("INDEXDOC "+indexDoc)
 await Promise.all([  this.podhandler.loadResource(indexDoc) ,
   this.podhandler.loadResource(this.activeWorkSpace.getChatStoreFile())
  ]) 
@@ -159,12 +157,10 @@ this.subscribe(chatDoc,this.syncMessages)
 this.subscribe(subjectDoc,this.syncMessages)
 
 
-  
    this.podhandler.store.each(
     subject, this.podhandler.ns.wf('message'), null,subjectDoc).forEach( st => {   
      
       const msgSym = st
-        console.log("Object "+st)
         let messageFile = st.doc().uri
       this.fileClient.fetchAndParse(messageFile,'text/turtle').then(graph=>{
 
@@ -180,14 +176,10 @@ this.subscribe(subjectDoc,this.syncMessages)
         if (alreadzExist === undefined) {
              this.messagesList.push(stored)
         }
-      
-     
       //  return stored
        
      },err=> console.log(err) )
-     
-  
-     
+      
     })
 
   //this.messagesList = await Promise.all(messagesMap)
@@ -230,7 +222,7 @@ this.subscribe(subjectDoc,this.syncMessages)
  workingIndex():any{
   if(this.activeWorkSpace.isMine()) 
   { 
-      console.log("IsMine "+this.activeWorkSpace.localIndexFile())
+     
     return this.activeWorkSpace.localIndexFile()
   }
   else {
@@ -240,7 +232,7 @@ this.subscribe(subjectDoc,this.syncMessages)
     let pred =   this.podhandler.store.sym(this.podhandler.ns.rdf("seeAlso"))
 
     let innd =  this.podhandler.store.canon(this.podhandler.store.any(subject,pred))
-    console.log("INDEX "+innd) 
+ 
 
     return innd      
   }
