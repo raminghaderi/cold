@@ -74,3 +74,10 @@ var friendlyWebid = function(webid) {
 export function getRandomIntInclusive(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
+
+export function removeTrailingSlash(str){
+	if(str.substr(-1) === '/' && str.length > 2) {
+        return str.substr(0, str.length - 1);
+    }
+    return str;
+}

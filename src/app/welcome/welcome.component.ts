@@ -6,6 +6,7 @@ import * as SolidFileClient from 'solid-file-client';
 import { PodHandlerService } from '../services/pod-handler.service';
 import { SolidSession } from '../models/solid-session.model';
 import { Observable } from 'rxjs';
+import { Router }  from '@angular/router';
 
 import CONTAINERS from '../containers.json'
 
@@ -35,7 +36,8 @@ export class WelcomeComponent implements OnInit {
 
   
   
-  constructor(private auth: AuthService,
+  constructor(private router: Router,
+              private auth: AuthService,
               private rdf: RdfService,
               private podhandler:PodHandlerService) { }
 
@@ -53,7 +55,7 @@ export class WelcomeComponent implements OnInit {
 
     const session = await solid.auth.currentSession();
     this.webId = session.webId.split('profile')[0];
-    this.workspace = this.webId + 'public/';
+    this.workspace = this.webId + 'public';
     
   };
 
@@ -63,15 +65,15 @@ export class WelcomeComponent implements OnInit {
 
 
   initWorkspace() {
-      let url = this.workspace + '' + this.folderName;
-      
+      let dest = this.workspace + '' +this.appRootDir+"/"+ this.folderName;
+      console.log(dest)
       // check if folder exists
-      this.podhandler.initializeContainers(this.folderName);
+      this.podhandler.initializeContainers(dest);
   }
 
   // TODO: redirect to dashboard and 
   getExistingWorkspaces = async() => {
-   await this.podhandler.getListWorkSpaces(this.workspace)
+    this.podhandler.getListWorkSpaces(this.workspace)
    .then( value => {
      if(typeof value === "object") {
        this.existingWorkspaces = value.folders
@@ -81,6 +83,14 @@ export class WelcomeComponent implements OnInit {
     // do something with the workspaces
       console.log("Workspaces: "+JSON.stringify(value))
    })
-      
   }
+
+  goToWkSpace =(wkspace)=>{
+    this.router.navigate(['/dashboard'])
+  }
+
+  joinWorkSpace=(url:string)=>{
+    this.podhandler.joinWorkSpace(url)
+  }
+
 }

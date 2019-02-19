@@ -37,11 +37,16 @@ const routes: Routes = [
     path: 'login-popup',
     component: LoginPopupComponent
   },
+  
   {
     path: 'dashboard',
     component: DashboardComponent,
     canActivate: [AuthGuard],
   },
+  {path: 'dashboard/:workspace', component: DashboardComponent,  
+  canActivate: [AuthGuard],
+  },
+  
   {
     path: 'card',
     component: CardComponent,

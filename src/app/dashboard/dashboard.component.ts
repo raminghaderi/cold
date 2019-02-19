@@ -1,13 +1,18 @@
 import { SolidSession } from './../models/solid-session.model';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Params } from '@angular/router';
 
 // Services
 import { AuthService } from '../services/solid.auth.service';
 import { RdfService } from '../services/rdf.service';
 import { SolidProfile } from '../models/solid-profile.model';
 import { PodHandlerService } from '../services/pod-handler.service';
+import * as SolidFileClient from "solid-file-client";
+
 import * as utils from '../utils/utililties';
+
+import { Workspace } from '../models/workspace.model';
+import { fetcher } from 'dist/solid-app/assets/types/rdflib';
 
 declare let solid: any;
 
@@ -17,6 +22,7 @@ declare let solid: any;
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
+
 export class DashboardComponent implements OnInit {
   profile: SolidProfile;
   loadingProfile: Boolean;
@@ -25,21 +31,26 @@ export class DashboardComponent implements OnInit {
   profileId: string;
   webId: string
   //friends = ['Ramin', 'Samuel', 'Zahra'];
-  existingWorkspaces = ['general', 'survey', 'credentials'];
+  existingWorkspaces:{}[] = [];
   friends=[]
-  messagesList:{}[]=[]
-  activeWorkSpace: string
-  activeChatStoreFile: any
-  activeIndexFile: any
+  messagesList:{uri?:string,value?:string}[]=[]
+  activeWorkSpace: Workspace
+ // activeChatStoreFile: any
+//  activeIndexFile: any
+  fileClient = SolidFileClient
+  fetcher:any
+
+  owner:string 
 
   constructor(private auth: AuthService,
               private route: ActivatedRoute,
               private rdf: RdfService,
               private podhandler: PodHandlerService) {}
 
-  ngOnInit() {
-    this.loadProfile(this.getAvailableWorkspaces);
-    
+  ngOnInit() { 
+    this.fetcher =   this.fetcher = this.rdf.fetcher;
+    this.loadProfile(this.getAvailableWorkspaces)
+
   }
 
   async loadProfile(callBackFn) {
@@ -84,68 +95,113 @@ export class DashboardComponent implements OnInit {
     this.auth.solidSignOut();
   }
 
- setActiveWS=async (wkspace:string)=>{
-    this.activeWorkSpace = wkspace
-    console.log(this.activeWorkSpace)
-   this.activeChatStoreFile = this.podhandler.getChatDocument(wkspace)
-   this.activeIndexFile = this.podhandler.getIndexfile(wkspace);
-    this.syncMessages()
+ setActiveWS= async(wkspace:any)=>{
+
+    this.activeWorkSpace = new Workspace(wkspace.url,this.profileId)
+    this.activeWorkSpace.setName(wkspace.name)
+   this.activeWorkSpace.owner = await  this.podhandler.loadResource(this.activeWorkSpace.localIndexFile())
+    .then(async (res)=>{
+           let sym =  this.podhandler.store.sym(this.activeWorkSpace.localIndexFile()+"#this")
+      let owner = this.podhandler.store.any(sym,
+          this.podhandler.store.sym(this.podhandler.ns.dc("author"))).uri
+
+          return owner
+    })
+    .catch(err=>{
+        console.log(err)
+    })
+
+   this.activeWorkSpace.indexFile = await this.workingIndex()
+
+   
+   //this.activeChatStoreFile = this.podhandler.getChatDocument(wkspace)
+
+  // this.activeIndexFile = this.podhandler.getIndexfile(wkspace);
+  // load the file and get the owner
+
+  await  this.syncMessages()
+    
+  
  }
 
- send=async(msg:string)=>{
+ send=(msg:string)=>{
    let that = this
-   console.log(msg)
-     this.podhandler.sendMessage(this.activeIndexFile,this.activeChatStoreFile,msg).then(_=>{
+ 
+     this.podhandler.sendMessage(this.activeWorkSpace,
+       msg)
+       .then(_=>{ 
+          console.log(msg)
       that.syncMessages()
      }
-     
-    )
+    ).catch(err=>{
+      console.log("Error "+err)
+    })
    
  }
 
  
-syncMessages= ()=> {
+syncMessages= async ()=> {
 
 // get references to the index.ttl and chat.ttl files and load to store
-let that = this
- Promise.all([ this.podhandler.loadResource(this.activeIndexFile),
-  this.podhandler.loadResource(this.activeChatStoreFile)])
-  .then(_=>{
+
+let indexDoc = this.workingIndex()+"#this"
+console.log ("INDEXDOC "+indexDoc)
+await Promise.all([  this.podhandler.loadResource(indexDoc) ,
+  this.podhandler.loadResource(this.activeWorkSpace.getChatStoreFile())
+ ]) 
+  .then(async _=>{
   
-    let subject = this.podhandler.store.sym(this.activeIndexFile)
- let chatDoc = this.podhandler.store.sym(this.activeChatStoreFile).doc()
+    let subject = this.podhandler.store.sym(indexDoc)
+    let subjectDoc = subject.doc()
+ let chatDoc = this.podhandler.store.sym(this.activeWorkSpace.getChatStoreFile()).doc()
  // Subscribe to receive changes
 this.subscribe(chatDoc,this.syncMessages)
-this.subscribe(subject.doc(),this.syncMessages)
+this.subscribe(subjectDoc,this.syncMessages)
 
 
-  var messages = this.podhandler.store.statementsMatching(
-    subject, this.podhandler.ns.wf('message'), null,chatDoc).map(st => { return st.object })
- 
-
-  messages =messages.map((m)=> {
-
-  let msg =  this.podhandler.store.any(
-      m,this.podhandler.ns.sioc('content'), null,chatDoc)
-       let stored = {}
   
-    stored['uri'] = m
-   stored['msg'] = msg.value
-   return stored
+   this.podhandler.store.each(
+    subject, this.podhandler.ns.wf('message'), null,subjectDoc).forEach( st => {   
+     
+      const msgSym = st
+        console.log("Object "+st)
+        let messageFile = st.doc().uri
+      this.fileClient.fetchAndParse(messageFile,'text/turtle').then(graph=>{
+
+        let msg =  graph.any(
+           msgSym,this.podhandler.ns.sioc('content'), null)
+            let stored:{uri?:string,value?:string}={}
+         
+        stored['uri'] = msgSym.value
+        stored['msg'] =  msg != undefined ? msg.value :"" 
+         
   
-  })
+        const alreadzExist = this.messagesList.find((msgObj) => msgObj.uri === stored.uri);
+        if (alreadzExist === undefined) {
+             this.messagesList.push(stored)
+        }
+      
+     
+      //  return stored
+       
+     },err=> console.log(err) )
+     
+  
+     
+    })
 
-  this.messagesList = messages;
+  //this.messagesList = await Promise.all(messagesMap)
 
-   console.log(this.messagesList)
-}, (err)=> {
+  
+  }, (err)=> {
     // error occurred
+    console.log(err)
 });
 
 }
 
  getAvailableWorkspaces = async() => {
-   let storageSpace=this.webId+"/public/"
+   let storageSpace=this.webId+"/public"
   await this.podhandler.getListWorkSpaces(storageSpace)
   .then( value => {
     if(typeof value === "object") {
@@ -165,5 +221,29 @@ this.subscribe(subject.doc(),this.syncMessages)
   subscribe =(doc,refreshFunction)=>{
   this.podhandler.updater.addDownstreamChangeListener(doc, refreshFunction)
  }
+
+ getOwner(workspace:string):string{
+
+   return ""
+ }
+
+ workingIndex():any{
+  if(this.activeWorkSpace.isMine()) 
+  { 
+      console.log("IsMine "+this.activeWorkSpace.localIndexFile())
+    return this.activeWorkSpace.localIndexFile()
+  }
+  else {
+   
+    let subject = this.podhandler.store.sym(this.activeWorkSpace.localIndexFile()+"#this")
+   
+    let pred =   this.podhandler.store.sym(this.podhandler.ns.rdf("seeAlso"))
+
+    let innd =  this.podhandler.store.canon(this.podhandler.store.any(subject,pred))
+    console.log("INDEX "+innd) 
+
+    return innd      
+  }
+}
 
 }
