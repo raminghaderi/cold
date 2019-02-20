@@ -1,6 +1,7 @@
 import { map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { SolidSession } from '../models/solid-session.model';
+import { SolidProfile } from '../models/solid-profile.model';
 declare let solid: any;
 declare let $rdf: any;
 //import * as $rdf from 'rdflib'
@@ -296,7 +297,7 @@ export class RdfService {
   };
 
 
-  getProfile = async (webId: string) => {
+  getProfile = async (webId: string):Promise<SolidProfile> => {
 
     /* if (!this.session) {
       await this.getSession();
@@ -311,8 +312,18 @@ export class RdfService {
 
     try {
       await this.fetcher.load(url);
-      //console.log(this.getValueFromFoaf('knows'));
-      return {
+      let prof =new SolidProfile()
+      prof.fn =  this.getValueFromFoaf('name', url)
+      prof.company = this.getValueFromVcard('organization-name', url)
+      prof.phone =this.getPhone(url)
+      prof.role = this.getValueFromVcard('role', url)
+      prof.image =this.getValueFromVcard('hasPhoto', url)
+      prof.address = this.getAddress(url)
+      prof.email = this.getEmail(url)
+      prof.friends =this.getValueFromFoaf('knows',url)
+      return prof
+      
+      /*{
         fn : this.getValueFromFoaf('name', url),
         company : this.getValueFromVcard('organization-name', url),
         phone: this.getPhone(url),
@@ -321,7 +332,7 @@ export class RdfService {
         address: this.getAddress(url),
         email: this.getEmail(url),
         friends: this.getValueFromFoaf('knows',url)
-      };
+      }; */
     } catch (error) {
       console.log(`Error fetching data: ${error}`);
     }

@@ -3,9 +3,7 @@
  * @see FOAF
  * @see VCARD
  */
-import { SolidProfileInterface } from "../interfaces/solid-profile.interface"
-
-export class SolidProfile implements SolidProfileInterface {
+export interface SolidProfileInterface {
     address: {
         street?: string;
         // TODO: Add the missing address fields
@@ -19,4 +17,3 @@ export class SolidProfile implements SolidProfileInterface {
     organization?: string;
     friends: any[];
 }
-

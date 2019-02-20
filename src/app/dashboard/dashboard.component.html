@@ -38,17 +38,8 @@
       </div>
       <div class= "chat-area">
           <div class="chat-area-wrapper">
-              <div class="message" *ngFor="let msg of messagesList">
-                  <div class="sender-img">
-                      <img [src]="profileImage" height="40" width="40">
-                  </div>
-                  <div class="sender-name">
-                      <div *ngIf="profile"><p><b>{{profile.fn}}</b></p></div>
-                  </div>
-                  <div class="sender-msg">
-                      <p>{{msg.msg}}</p>
-                  </div>
-              </div>
+              <app-message-area [messagesList]="messagesList"> </app-message-area>
+            
           </div>
       </div>
       <div class="sender-msg-area">

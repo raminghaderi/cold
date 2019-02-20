@@ -157,6 +157,9 @@ html {
 .sender-msg {
     grid-column: 2/4
 }
+.time-display {
+    grid-column: 2/4
+}
 .sender-msg-area {
     display: grid;
     grid-template-columns: 1fr 17fr 1fr;

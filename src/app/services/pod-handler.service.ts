@@ -457,11 +457,7 @@ export class PodHandlerService {
     // http://www.w3schools.com/jsref/jsref_obj_date.asp
     var message = this.store.sym(messageStore.uri + "#" + "Msg" + timestamp);
   
-    var sts = [];
-    sts.push(
-      new $rdf.Statement(subject, )  // Changed to store message flow in main index.ttl file
-    );
-
+  
     this.store.add(subject, this.ns.wf("message"), message, subjectDoc)
 
     // sts.push(new $rdf.Statement(message, ns.dc('title'), kb.literal(titlefield.value), messageStore))
@@ -491,18 +487,8 @@ export class PodHandlerService {
       messageStore)
 
 
-    if (workspace.isMine)
-    /*
-    sts.push(
-        new $rdf.Statement(
-          message,
-          this.ns.foaf("maker"),
-          workspace.me,
-          messageStore
-        )
-      ); */
-
-  this.store.add(message,this.ns.foaf("maker"),workspace.me,messageStore)
+  //  if (workspace.isMine)
+        this.store.add(message,this.ns.foaf("maker"),workspace.me,messageStore)
 /*
     var sendComplete = function(uri, success, body) {
       if (!success) {

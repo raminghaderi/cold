@@ -1,29 +1,35 @@
 import { SolidSession } from './../models/solid-session.model';
-import { Component, OnInit } from '@angular/core';
+import { Component,ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
+import { formatDate } from '@angular/common'
+
 
 // Services
 import { AuthService } from '../services/solid.auth.service';
 import { RdfService } from '../services/rdf.service';
 import { SolidProfile } from '../models/solid-profile.model';
 import { PodHandlerService } from '../services/pod-handler.service';
+import { Message } from '../models/message.model';
+
 import * as SolidFileClient from "solid-file-client";
 
 import * as utils from '../utils/utililties';
 
 import { Workspace } from '../models/workspace.model';
-import { fetcher } from 'dist/solid-app/assets/types/rdflib';
 
 declare let solid: any;
-
+declare let $rdf: any;
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrls: ['./dashboard.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 
-export class DashboardComponent implements OnInit {
+
+
+export class DashboardComponent implements OnInit, OnDestroy{
   profile: SolidProfile;
   loadingProfile: Boolean;
   profileImage: string;
@@ -33,14 +39,18 @@ export class DashboardComponent implements OnInit {
   //friends = ['Ramin', 'Samuel', 'Zahra'];
   existingWorkspaces:{}[] = [];
   friends=[]
-  messagesList:{uri?:string,value?:string}[]=[]
+  messagesList:Message[]=[]
   activeWorkSpace: Workspace
  // activeChatStoreFile: any
 //  activeIndexFile: any
   fileClient = SolidFileClient
   fetcher:any
+  isIndexSubscribed:boolean = false
+  isChatFileSubscribed:boolean = false
 
   owner:string 
+
+  @ViewChild('messageBox') messageBox: ElementRef
 
   constructor(private auth: AuthService,
               private route: ActivatedRoute,
@@ -50,7 +60,12 @@ export class DashboardComponent implements OnInit {
   ngOnInit() { 
     this.fetcher =   this.fetcher = this.rdf.fetcher;
     this.loadProfile(this.getAvailableWorkspaces)
+    
+  }
 
+  ngOnDestroy(){
+    this.isChatFileSubscribed = false
+    this.isIndexSubscribed = false
   }
 
   async loadProfile(callBackFn) {
@@ -125,12 +140,14 @@ export class DashboardComponent implements OnInit {
 
  send=(msg:string)=>{
    let that = this
- 
+    let msgg = msg
      this.podhandler.sendMessage(this.activeWorkSpace,
-       msg)
+       msgg)
        .then(_=>{ 
-          console.log(msg)
-      that.syncMessages()
+          console.log(msgg)
+      this.messageBox.nativeElement.value = ""
+      that.syncMessages();
+      
      }
     ).catch(err=>{
       console.log("Error "+err)
@@ -153,38 +170,23 @@ await Promise.all([  this.podhandler.loadResource(indexDoc) ,
     let subjectDoc = subject.doc()
  let chatDoc = this.podhandler.store.sym(this.activeWorkSpace.getChatStoreFile()).doc()
  // Subscribe to receive changes
-this.subscribe(chatDoc,this.syncMessages)
-this.subscribe(subjectDoc,this.syncMessages)
+if(!(this.isIndexSubscribed)) this.subscribe(subjectDoc,this.syncMessages)
+if(!(this.isChatFileSubscribed)) this.subscribe(chatDoc,this.syncMessages)
 
 
    this.podhandler.store.each(
     subject, this.podhandler.ns.wf('message'), null,subjectDoc).forEach( st => {   
      
-      const msgSym = st
+      
         let messageFile = st.doc().uri
       this.fileClient.fetchAndParse(messageFile,'text/turtle').then(graph=>{
 
-        let msg =  graph.any(
-           msgSym,this.podhandler.ns.sioc('content'), null)
-            let stored:{uri?:string,value?:string}={}
-         
-        stored['uri'] = msgSym.value
-        stored['msg'] =  msg != undefined ? msg.value :"" 
-         
-  
-        const alreadzExist = this.messagesList.find((msgObj) => msgObj.uri === stored.uri);
-        if (alreadzExist === undefined) {
-             this.messagesList.push(stored)
-        }
-      //  return stored
-       
+     this.parseMessage(graph,st)
+
      },err=> console.log(err) )
       
     })
 
-  //this.messagesList = await Promise.all(messagesMap)
-
-  
   }, (err)=> {
     // error occurred
     console.log(err)
@@ -206,18 +208,35 @@ this.subscribe(subjectDoc,this.syncMessages)
      
  }
 
- parseMessages=()=>{
-
- }
-
   subscribe =(doc,refreshFunction)=>{
   this.podhandler.updater.addDownstreamChangeListener(doc, refreshFunction)
  }
 
- getOwner(workspace:string):string{
+ /**
+  *  Parse the message to an object
+  *  */ 
+ parseMessage =async (graph:any,msgSym:any)=>{
 
-   return ""
+
+  let msg = new Message()
+  let content =  graph.any(msgSym,this.podhandler.ns.sioc('content'), null)
+   let time =  graph.any(msgSym,this.podhandler.ns.dc("created"), null)
+   let maker =  graph.any(msgSym,this.podhandler.ns.foaf("maker"), null)
+
+  msg.uri = msgSym.value
+  msg.content =  content != undefined ? content.value :"" 
+  msg.dateCreated =  new Date(time) 
+
+  msg.maker = maker.value
+  
+  msg.makerProfile =  await this.rdf.getProfile(msg.maker)
+ const alreadyExist = this.messagesList.find((msgObj) => msgObj.uri === msg.uri);
+ if (alreadyExist === undefined) {
+      this.messagesList.push(msg)
  }
+  
+ }
+
 
  workingIndex():any{
   if(this.activeWorkSpace.isMine()) 
@@ -226,14 +245,9 @@ this.subscribe(subjectDoc,this.syncMessages)
     return this.activeWorkSpace.localIndexFile()
   }
   else {
-   
     let subject = this.podhandler.store.sym(this.activeWorkSpace.localIndexFile()+"#this")
-   
     let pred =   this.podhandler.store.sym(this.podhandler.ns.rdf("seeAlso"))
-
     let innd =  this.podhandler.store.canon(this.podhandler.store.any(subject,pred))
- 
-
     return innd      
   }
 }

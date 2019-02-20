@@ -10,6 +10,7 @@ import { LoginComponent } from './login/login.component';
 import { CardComponent } from './card/card.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 
+
 // Services
 import { AuthService } from './services/solid.auth.service';
 import { AuthGuard } from './services/auth.guard.service';
@@ -22,7 +23,8 @@ import { WelcomeComponent } from './welcome/welcome.component';
 import { LongchatComponent } from './longchat/longchat.component';
 import { PodHandlerService } from './services/pod-handler.service';
 
-
+import { MomentModule } from 'angular2-moment';
+import { MessageAreaComponent } from './message-area/message-area.component';
 
 const routes: Routes = [
   {
@@ -77,6 +79,7 @@ const routes: Routes = [
     RegisterComponent,
     WelcomeComponent,
     LongchatComponent,
+    MessageAreaComponent,
   ],
   imports: [
     BrowserModule,
@@ -85,7 +88,8 @@ const routes: Routes = [
     RouterModule.forRoot(routes),
     NgSelectModule,
     ToastrModule.forRoot(),
-    BrowserAnimationsModule // required for toastr
+    BrowserAnimationsModule, // required for toastr
+    MomentModule
   ],
   providers: [AuthService,PodHandlerService],
   bootstrap: [AppComponent]
