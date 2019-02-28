@@ -4,7 +4,6 @@
     <div class="row mx-auto">
       <div class="chat-container col-md-12 col-lg-12 col-xxxl-7">
   <!-- EXAMPLE TOP NAV -->
-  
   <h1>Profile</h1>
 
   <!-- LOADING IMAGE -->
@@ -15,15 +14,14 @@
   <!-- MAIN PROFILE -->
  <!-- <div class="profile-fields-container" *ngIf="!loadingProfile"> -->
     <div class="profile-image-container">
-
         <!--<img [src]="profile.picture" />-->
       <div class="text-center">
-        <img [src]="profile.picture" class="circle-pic mx-auto d-block" width="200" height="200" alt="..."/>
+        <img [src]="profile.picture" alt="..." class="circle-pic mx-auto d-block"
+             height="200" width="200"/>
       </div>
-
     </div>
    
-    <form style="padding-top: 26px;" #f="ngForm" (submit)="onSubmit()">
+    <form #f="ngForm" (submit)="onSubmit()" style="padding-top: 26px;">
       <div class="fields pure-g form-group">
         <!-- NAME -->
         <div class="col-auto">
@@ -32,7 +30,8 @@
             <div class="input-group-prepend">
               <div class="input-group-text"><i class="fas fa-user"></i> </div>
             </div>
-          <input type="text" nbInput class="field-text form-control" name="fn" placeholder="Name" id="inlineFormInputGroup" [(ngModel)]="profile.fn" />
+          <input [(ngModel)]="profile.fn" class="field-text form-control"
+                 id="inlineFormInputGroup" name="fn" nbInput placeholder="Name" type="text" />
           </div>
         </div>
 
@@ -43,7 +42,8 @@
             <div class="input-group-prepend">
               <div class="input-group-text"><i class="fas fa-phone"></i> </div>
             </div>
-            <input type="text" nbInput class="field-text form-control" name="fn" placeholder="Phone" id="inlineFormInputGroupPhone" [(ngModel)]="profile.phone" />
+            <input [(ngModel)]="profile.phone" class="field-text form-control"
+                   id="inlineFormInputGroupPhone" name="fn" nbInput placeholder="Phone" type="text" />
           </div>
         </div>
       </div>
@@ -56,7 +56,8 @@
             <div class="input-group-prepend">
               <div class="input-group-text"><i class="fas fa-user-astronaut"></i> </div>
             </div>
-            <input type="text" nbInput class="field-text form-control" name="fn" placeholder="Role" id="inlineFormInputGroupRole" [(ngModel)]="profile.role" />
+            <input [(ngModel)]="profile.role" class="field-text form-control"
+                   id="inlineFormInputGroupRole" name="fn" nbInput placeholder="Role" type="text" />
           </div>
         </div>
 
@@ -67,7 +68,8 @@
             <div class="input-group-prepend">
               <div class="input-group-text"><i class="fas fa-envelope"></i> </div>
             </div>
-            <input type="text" nbInput class="field-text form-control" name="fn" placeholder="Email" id="inlineFormInputGroupMail" [(ngModel)]="profile.email" />
+            <input [(ngModel)]="profile.email" class="field-text form-control"
+                   id="inlineFormInputGroupMail" name="fn" nbInput placeholder="Email" type="text" />
           </div>
         </div>
       </div>
@@ -80,7 +82,8 @@
             <div class="input-group-prepend">
               <div class="input-group-text"><i class="fas fa-building"></i> </div>
             </div>
-            <input type="text" nbInput class="field-text form-control" name="fn" placeholder="Company" id="inlineFormInputGroupCompany" [(ngModel)]="profile.email" />
+            <input [(ngModel)]="profile.email" class="field-text form-control"
+                   id="inlineFormInputGroupCompany" name="fn" nbInput placeholder="Company" type="text" />
           </div>
         </div>
 
@@ -92,7 +95,8 @@
       </div>
 
       <div class="profile-save-button-container">
-        <button type="submit" nbButton class="wide-button profile-save-button" [disabled]="!cardForm || cardForm.pristine">Save</button>
+        <button [disabled]="!cardForm || cardForm.pristine" class="wide-button profile-save-button"
+                nbButton type="submit">Save</button>
     </div>
     </form>
   <!--</div>-->
