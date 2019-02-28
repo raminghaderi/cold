@@ -6,7 +6,7 @@ import { DashboardComponent } from './dashboard.component';
 import { ChatComponent } from './chat/chat.component';
 
 import { ThemeModule } from '../@theme/theme.module';
-import { AuthModule } from '../auth/auth.module'
+import { AuthModule } from '../auth/auth.module';
 import { PodHandlerService } from '../services/pod-handler.service';
 import { RdfService } from '../services/rdf.service';
 import { AuthService } from '../services/solid.auth.service';
@@ -18,8 +18,8 @@ import { WelcomeComponent } from './welcome/welcome.component';
   imports: [
     ThemeModule,
     DashboardRoutingModule,
-    AuthModule
+    AuthModule,
   ],
-  providers:[]
+  providers: [],
 })
 export class DashboardModule { }

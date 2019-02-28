@@ -99,7 +99,7 @@ const NB_MODULES = [
   NbRadioModule,
   NbSelectModule,
   NbTooltipModule,
-  NbChatModule
+  NbChatModule,
 ];
 
 const COMPONENTS = [

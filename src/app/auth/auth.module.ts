@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 import { NbAuthModule } from '@nebular/auth';
-import { 
+import {
   NbAlertModule,
   NbButtonModule,
   NbCheckboxModule,
@@ -37,8 +37,8 @@ import { PodHandlerService } from '../services/pod-handler.service';
     NbSelectModule,
 
     NbAuthModule,
-    ThemeModule
+    ThemeModule,
   ],
-  providers:[Location]
+  providers: [Location],
 })
 export class AuthModule { }

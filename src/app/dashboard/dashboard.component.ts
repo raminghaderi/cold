@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewChild, ElementRef, Injectable, OnDestroy } from '@angular/core';
+import { Component, OnInit, Injectable } from '@angular/core';
 
-import { NbMenuItem, NbMenuService } from '@nebular/theme';
+import { NbMenuItem } from '@nebular/theme';
 
 import { MENU_ITEMS } from '../pages/pages-menu';
 
@@ -42,7 +42,7 @@ declare let $rdf: any;
 @Component({
   selector: 'dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss'],
 })
 
 
@@ -52,15 +52,15 @@ export class DashboardComponent implements OnInit {
   profileImage: string;
   session: SolidSession;
   profileId: string;
-  webId: string
+  webId: string;
   //friends = ['Ramin', 'Samuel', 'Zahra'];
-  existingWorkspaces:{}[] = [];
-  friends=[]
+  existingWorkspaces: {}[] = [];
+  friends= [];
 
   selectedItem: any;
-  fetcher:any
+  fetcher: any;
 
-  owner:string 
+  owner: string;
 
   menu:  NbMenuItem[] = [
     {
@@ -72,10 +72,10 @@ export class DashboardComponent implements OnInit {
     {
       title: 'Chat Spaces',
       group: true,
-      
-    }, 
-  
-  ]
+
+    },
+
+  ];
 
   constructor(private auth: AuthService,
     private route: ActivatedRoute,
@@ -85,11 +85,11 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
       this.fetcher =   this.fetcher = this.podhandler.rdf.fetcher;
-    this.loadProfile(this.getAvailableWorkspaces)
+    this.loadProfile(this.getAvailableWorkspaces);
   }
 
 
-  async loadProfile(callBackFn=undefined) {
+  async loadProfile(callBackFn= undefined) {
     try {
     //  this.loadingProfile = true;
       this.session =  await solid.auth.currentSession();
@@ -97,22 +97,22 @@ export class DashboardComponent implements OnInit {
       this.webId = this.profileId.split('/profile')[0];
 
       const profile = await this.podhandler.rdf.getProfile(this.profileId);
-         
+
       if (profile) {
       this.profile = profile;
-        this.auth.saveOldUserData(profile); 
-  
+        this.auth.saveOldUserData(profile);
+
         // LoadFriends
-        for (let f=0; f<profile.friends.length; f++){
-         let friendProfile = await this.podhandler.rdf.getProfile(profile.friends[f])
-          this.friends.push(friendProfile)
+        for (let f = 0; f < profile.friends.length; f++){
+         const friendProfile = await this.podhandler.rdf.getProfile(profile.friends[f]);
+          this.friends.push(friendProfile);
         }
 
-        this.setupProfilePic()
-      this.userService.setUserProfile(this.profile)
+        this.setupProfilePic();
+      this.userService.setUserProfile(this.profile);
       }
 
-    if(callBackFn != undefined)  callBackFn()
+    if (callBackFn != undefined)  callBackFn();
     } catch (error) {
       console.log(`Error: ${error}`);
     }
@@ -121,49 +121,49 @@ export class DashboardComponent implements OnInit {
     private setupProfilePic() {
     this.profile.picture =  this.profile.picture ? this.profile.picture : '/assets/images/profile.png';
     }
-      
+
     getAvailableWorkspaces = async() => {
-     let storageSpace=this.webId+"/public"
+     const storageSpace = this.webId + '/public';
       await this.podhandler.getListWorkSpaces(storageSpace)
     .then( value => {
-       if(typeof value === "object") {
-          this.existingWorkspaces  = value.folders
+       if (typeof value === 'object') {
+          this.existingWorkspaces  = value.folders;
    }
 
-   this.generateMenu()
+   this.generateMenu();
   // do something with the workspaces
-    console.log("Workspaces: "+JSON.stringify(value))
- })
-    
+    console.log('Workspaces: ' + JSON.stringify(value));
+ });
+
 }
 
 generateMenu(){
-  let itemGroup ={ 
+  const itemGroup = {
     title: 'Spaces',
   icon: 'nb-chat',
   expanded: true,
   children: [],
-  }
+  };
 
- 
 
-  this.existingWorkspaces.forEach((workspace:any)=>{
-    let item= { 
-      title:'',
-    link:'',
-    payload:{},
-  
-    }  
 
-    item.title = workspace.name
-    item.link = '/dashboard/chat/'+workspace.name,
+  this.existingWorkspaces.forEach((workspace: any) => {
+    const item = {
+      title: '',
+    link: '',
+    payload: {},
+
+    };
+
+    item.title = workspace.name;
+    item.link = '/dashboard/chat/' + workspace.name,
    item.payload  = workspace,
-    itemGroup.children.push(item)
-  
-  })
-  
-  if(itemGroup.children.length >0)  
-      this.menu = [...this.menu,itemGroup]
+    itemGroup.children.push(item);
+
+  });
+
+  if (itemGroup.children.length > 0)
+      this.menu = [...this.menu, itemGroup];
 }
 
 }

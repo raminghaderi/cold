@@ -7,7 +7,7 @@ import { NgForm } from '@angular/forms';
 @Component({
   selector: 'profile',
   templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.scss']
+  styleUrls: ['./profile.component.scss'],
 })
 export class ProfileComponent implements OnInit {
 
@@ -15,7 +15,7 @@ export class ProfileComponent implements OnInit {
 
   @ViewChild('f') cardForm: NgForm;
 
-  
+
   constructor(private podhandler: PodHandlerService,
     private userService: UserProfileService) { }
 

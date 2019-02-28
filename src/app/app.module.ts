@@ -15,7 +15,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { ThemeModule } from './@theme/theme.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrModule } from 'ngx-toastr';
- 
+
 /**Services */
 
 import { PodHandlerService } from './services/pod-handler.service';
@@ -44,7 +44,7 @@ import { UserProfileService } from './services/user-profile.service';
     UserProfileService,
     { provide: APP_BASE_HREF, useValue: '/' },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 
 export class AppModule {

@@ -54,7 +54,7 @@ export class RdfService {
    */
   getSession = async() => {
     this.session = await solid.auth.currentSession(localStorage);
-    console.log("SESSION "+JSON.stringify(this.session))
+    console.log('SESSION ' + JSON.stringify(this.session));
   }
 
   /**
@@ -70,7 +70,7 @@ export class RdfService {
    */
   getValueFromVcard = (node: string, webId?: string): string | any => {
     return this.getValueFromNamespace(node, VCARD, webId);
-  };
+  }
 
   /**
    * Gets a node that matches the specified pattern using the FOAF onthology
@@ -79,12 +79,12 @@ export class RdfService {
    * @return {string} The value of the fetched node or an emtpty string
    */
   getValueFromFoaf = (node: string, webId?: string) => {
-    if(node == 'knows') {
+    if (node == 'knows') {
       return this.getFriends(node, FOAF, webId);
     }
     return this.getValueFromNamespace(node, FOAF, webId);
-  };
- 
+  }
+
   transformDataForm = (form: NgForm, me: any, doc: any) => {
     const insertions = [];
     const deletions = [];
@@ -98,15 +98,15 @@ export class RdfService {
     // These are separate codepaths because the system needs to know what to do in each case
     fields.map(field => {
 
-      let predicate = VCARD(this.getFieldName(field));
-      let subject = this.getUriForField(field, me);
-      let why = doc;
+      const predicate = VCARD(this.getFieldName(field));
+      const subject = this.getUriForField(field, me);
+      const why = doc;
 
-      let fieldValue = this.getFieldValue(form, field);
-      let oldFieldValue = this.getOldFieldValue(field, oldProfileData);
+      const fieldValue = this.getFieldValue(form, field);
+      const oldFieldValue = this.getOldFieldValue(field, oldProfileData);
 
       // if there's no existing home phone number or email address, we need to add one, then add the link for hasTelephone or hasEmail
-      if(!oldFieldValue && fieldValue && (field === 'phone' || field==='email')) {
+      if (!oldFieldValue && fieldValue && (field === 'phone' || field === 'email')) {
         this.addNewLinkedField(field, insertions, predicate, fieldValue, why, me);
       } else {
 
@@ -130,26 +130,26 @@ export class RdfService {
 
     return {
       insertions: insertions,
-      deletions: deletions
+      deletions: deletions,
     };
-  };
+  }
 
   private addNewLinkedField(field, insertions, predicate, fieldValue, why, me: any) {
     //Generate a new ID. This id can be anything but needs to be unique.
-    let newId = field + ':' + Date.now();
+    const newId = field + ':' + Date.now();
 
     //Get a new subject, using the new ID
-    let newSubject = $rdf.sym(this.session.webId.split('#')[0] + '#' + newId);
+    const newSubject = $rdf.sym(this.session.webId.split('#')[0] + '#' + newId);
 
     //Set new predicate, based on email or phone fields
-    let newPredicate = field === 'phone' ? $rdf.sym(VCARD('hasTelephone')) : $rdf.sym(VCARD('hasEmail'));
+    const newPredicate = field === 'phone' ? $rdf.sym(VCARD('hasTelephone')) : $rdf.sym(VCARD('hasEmail'));
 
     //Add new phone or email to the pod
     insertions.push($rdf.st(newSubject, predicate, fieldValue, why));
 
     //Set the type (defaults to Home/Personal for now) and insert it into the pod as well
     //Todo: Make this dynamic
-    let type = field === 'phone' ? $rdf.literal('Home') : $rdf.literal('Personal');
+    const type = field === 'phone' ? $rdf.literal('Home') : $rdf.literal('Personal');
     insertions.push($rdf.st(newSubject, VCARD('type'), type, why));
 
     //Add a link in #me to the email/phone number (by id)
@@ -160,16 +160,16 @@ export class RdfService {
     let uriString: string;
     let uri: any;
 
-    switch(field) {
+    switch (field) {
       case 'phone':
         uriString = this.getValueFromVcard('hasTelephone');
-        if(uriString) {
+        if (uriString) {
           uri = $rdf.sym(uriString);
         }
         break;
       case 'email':
         uriString = this.getValueFromVcard('hasEmail');
-        if(uriString) {
+        if (uriString) {
           uri = $rdf.sym(uriString);
         }
         break;
@@ -190,16 +190,16 @@ export class RdfService {
   private getFieldValue(form: NgForm, field: string): any {
     let fieldValue: any;
 
-    if(!form.value[field]) {
+    if (!form.value[field]) {
       return;
     }
 
-    switch(field) {
+    switch (field) {
       case 'phone':
-        fieldValue = $rdf.sym('tel:+'+form.value[field]);
+        fieldValue = $rdf.sym('tel:+' + form.value[field]);
         break;
       case 'email':
-        fieldValue = $rdf.sym('mailto:'+form.value[field]);
+        fieldValue = $rdf.sym('mailto:' + form.value[field]);
         break;
       default:
         fieldValue = form.value[field];
@@ -212,16 +212,16 @@ export class RdfService {
   private getOldFieldValue(field, oldProfile): any {
     let oldValue: any;
 
-    if(!oldProfile || !oldProfile[field]) {
+    if (!oldProfile || !oldProfile[field]) {
       return;
     }
 
-    switch(field) {
+    switch (field) {
       case 'phone':
-        oldValue = $rdf.sym('tel:+'+oldProfile[field]);
+        oldValue = $rdf.sym('tel:+' + oldProfile[field]);
         break;
       case 'email':
-        oldValue = $rdf.sym('mailto:'+oldProfile[field]);
+        oldValue = $rdf.sym('mailto:' + oldProfile[field]);
         break;
       default:
         oldValue = oldProfile[field];
@@ -248,25 +248,25 @@ export class RdfService {
     const doc = $rdf.NamedNode.fromValue(this.session.webId.split('#')[0]);
     const data = this.transformDataForm(form, me, doc);
 
-    console.log("Insertions "+JSON.stringify(data))
+    console.log('Insertions ' + JSON.stringify(data));
 
     //Update existing values
-    if(data.insertions.length > 0 || data.deletions.length > 0) {
+    if (data.insertions.length > 0 || data.deletions.length > 0) {
       this.updateManager.update(data.deletions, data.insertions, (response, success, message) => {
-        if(success) {
+        if (success) {
           this.toastr.success('Your Solid profile has been successfully updated', 'Success!');
           form.form.markAsPristine();
           form.form.markAsTouched();
         } else {
-          this.toastr.error('Message: '+ message, 'An error has occurred');
+          this.toastr.error('Message: ' + message, 'An error has occurred');
         }
       });
     }
-  };
+  }
 
   getAddress = (webId?: string) => {
     const linkedUri = this.getValueFromVcard('hasAddress', webId);
-console.log("Address: "+linkedUri)
+console.log('Address: ' + linkedUri);
     if (linkedUri) {
       return {
         locality: this.getValueFromVcard('locality', linkedUri),
@@ -277,7 +277,7 @@ console.log("Address: "+linkedUri)
     }
 
     return {};
-  };
+  }
 
   //Function to get email. This returns only the first email, which is temporary
   getEmail = (webId?: string) => {
@@ -294,38 +294,38 @@ console.log("Address: "+linkedUri)
   getPhone = (webId?: string) => {
     const linkedUri = this.getValueFromVcard('hasTelephone', webId);
 
-    if(linkedUri) {
+    if (linkedUri) {
       return this.getValueFromVcard('value', linkedUri).split('tel:+')[1];
     }
-  };
+  }
 
 
-  getProfile = async (webId: string):Promise<SolidProfile> => {
+  getProfile = async (webId: string): Promise<SolidProfile> => {
 
     /* if (!this.session) {
       await this.getSession();
     } */
     let url;
 
-    if(webId.includes('card#me')) {
+    if (webId.includes('card#me')) {
       url = webId;
     } else {
-      url = webId+'/profile/card#me';
+      url = webId + '/profile/card#me';
     }
 
     try {
       await this.fetcher.load(url);
-      let prof =new SolidProfile()
-      prof.fn =  this.getValueFromFoaf('name', url)
-      prof.company = this.getValueFromVcard('organization-name', url)
-      prof.phone =this.getPhone(url)
-      prof.role = this.getValueFromVcard('role', url)
-      prof.picture =this.getValueFromVcard('hasPhoto', url)
-      prof.address = this.getAddress(url)
-      prof.email = this.getEmail(url)
-      prof.friends =this.getValueFromFoaf('knows',url)
-      return prof
-      
+      const prof = new SolidProfile();
+      prof.fn =  this.getValueFromFoaf('name', url);
+      prof.company = this.getValueFromVcard('organization-name', url);
+      prof.phone = this.getPhone(url);
+      prof.role = this.getValueFromVcard('role', url);
+      prof.picture = this.getValueFromVcard('hasPhoto', url);
+      prof.address = this.getAddress(url);
+      prof.email = this.getEmail(url);
+      prof.friends = this.getValueFromFoaf('knows', url);
+      return prof;
+
       /*{
         fn : this.getValueFromFoaf('name', url),
         company : this.getValueFromVcard('organization-name', url),
@@ -339,13 +339,13 @@ console.log("Address: "+linkedUri)
     } catch (error) {
       console.log(`Error fetching data: ${error}`);
     }
-  };
+  }
 
   /**
    * Gets any resource that matches the node, using the provided Namespace
-   * @param {string} node The name of the predicate to be applied using the provided Namespace 
+   * @param {string} node The name of the predicate to be applied using the provided Namespace
    * @param {$rdf.namespace} namespace The RDF Namespace
-   * @param {string?} webId The webId URL (e.g. https://yourpod.solid.community/profile/card#me) 
+   * @param {string?} webId The webId URL (e.g. https://yourpod.solid.community/profile/card#me)
    */
   private getValueFromNamespace(node: string, namespace: any, webId?: string): string | any {
     const store = this.store.any($rdf.sym(webId || this.session.webId), namespace(node));
@@ -357,11 +357,11 @@ console.log("Address: "+linkedUri)
 
   getFriends(node: string, namespace: any, webId?: string): string | any {
     const store = this.store.match($rdf.sym(webId || this.session.webId), namespace(node));
-      var friends = [];
-      var test;
+      const friends = [];
+      let test;
       store.forEach(async (friend) => {
         friends.push(friend.object.value);
-      })
+      });
       //console.log(friends);
       return friends;
   }

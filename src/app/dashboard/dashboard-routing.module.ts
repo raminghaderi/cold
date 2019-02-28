@@ -13,17 +13,17 @@ const routes: Routes = [{
       path: '',
       component: WelcomeComponent,
     },
-   
+
     {
       path: 'profile',
       component: ProfileComponent,
-    }, 
+    },
     {
       path: 'chat/:ws',
       component: ChatComponent,
     },
     {
-      path: 'chat',  
+      path: 'chat',
       redirectTo: '/dashboard',
       pathMatch: 'full',
     },
@@ -36,6 +36,6 @@ const routes: Routes = [{
 }];
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class DashboardRoutingModule { }

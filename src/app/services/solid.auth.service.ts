@@ -86,9 +86,9 @@ export class AuthService {
   *  is populated by the getIdentityProviders() function call. It currently requires a callback url and a storage option or else
   *  the call will fail.
   */
-  solidLogin = async (idp: string,callbackUrl) => {
+  solidLogin = async (idp: string, callbackUrl) => {
     await solid.auth.login(idp, {
-      callbackUri:callbackUrl, //`${window.location.href}dashboard`
+      callbackUri: callbackUrl, //`${window.location.href}dashboard`
       storage: localStorage,
     });
   }
@@ -103,25 +103,25 @@ export class AuthService {
       name: 'Inrupt',
       image: '/assets/images/Inrupt.png',
       loginUrl: 'https://inrupt.net/auth',
-      desc: 'Inrupt Inc. provider'
+      desc: 'Inrupt Inc. provider',
     };
     const solidCommunityProvider: SolidProvider = {
       name: 'Solid Community',
       image: '/assets/images/Solid.png',
       loginUrl: 'https://solid.community',
-      desc: 'A provider maintained by the Solid Community'
+      desc: 'A provider maintained by the Solid Community',
     };
     const otherProvider: SolidProvider = {
       name: 'Other (Enter WebID)',
       image: '/assets/images/Generic.png',
       loginUrl: null,
-      desc: 'Generic provider'
+      desc: 'Generic provider',
     };
 
     return [
       inruptProvider,
       solidCommunityProvider,
-      otherProvider
+      otherProvider,
     ];
   }
 }

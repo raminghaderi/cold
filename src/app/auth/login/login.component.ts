@@ -1,6 +1,6 @@
-import { Component,ChangeDetectorRef, OnInit } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import {  Location } from '@angular/common';
-import { NbLoginComponent,NbAuthService } from '@nebular/auth';
+import { NbLoginComponent, NbAuthService } from '@nebular/auth';
 
 // Auth Service
 import { AuthService } from '../../services/solid.auth.service';
@@ -25,33 +25,33 @@ export class LoginComponent extends NbLoginComponent implements OnInit {
   errors: string[] = [];
   messages: string[] = [];
   showMessages: any = {};
-  origin:any
+  origin: any;
 
 
-  constructor(  location: Location, private solidAuth: AuthService, nbAuth:NbAuthService,  router: Router, cd:ChangeDetectorRef){
-    super( nbAuth,{},cd, router);
-  
+  constructor(  location: Location, private solidAuth: AuthService, nbAuth: NbAuthService,  router: Router, cd: ChangeDetectorRef){
+    super( nbAuth, {}, cd, router);
+
   }
 
   ngOnInit() {
-      this.origin = location.origin
-  //  console.log(this.origin);   
+      this.origin = location.origin;
+  //  console.log(this.origin);
    this.identityProviders = this.solidAuth.getIdentityProviders();
-    console.log("Id providers: "+JSON.stringify(this.identityProviders))
-  
+    console.log('Id providers: ' + JSON.stringify(this.identityProviders));
+
   }
 
   goToRegistration(){
     this.router.navigateByUrl('/register');
   }
 
-  
+
   onLogin = async () => {
     const idp: string = this.selectedProviderUrl ? this.selectedProviderUrl : this.customProviderUrl;
 
     if (idp) {
       try {
-     
+
         this.solidAuth.solidLogin(idp, `${this.origin}/`);
       } catch (err) {
         console.log('An error has occurred logging in: ' + err);

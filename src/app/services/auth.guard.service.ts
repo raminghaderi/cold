@@ -3,14 +3,14 @@ import {
   CanActivate,
   ActivatedRouteSnapshot,
   RouterStateSnapshot,
-  Router
+  Router,
 } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take, tap } from 'rxjs/operators';
 
 import { AuthService } from './solid.auth.service';
 
-declare let solid: any
+declare let solid: any;
 
 @Injectable({
   providedIn: 'root',
@@ -20,9 +20,9 @@ export class AuthGuard implements CanActivate {
 
   canActivate(
     next: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
+    state: RouterStateSnapshot,
   ): Observable<boolean> | Promise<boolean> | boolean {
-   
+
     const isLoggedIn = localStorage.getItem('solid-auth-client') ? true : false;
 
     if (!isLoggedIn) {
@@ -43,8 +43,8 @@ export class AuthGuard implements CanActivate {
   async getSession(): Promise<boolean>{
     const session = await solid.auth.currentSession();
     if (!session)
-      return false
+      return false;
     else
-      return true
+      return true;
   }
 }

@@ -3,7 +3,7 @@
  * @see FOAF
  * @see VCARD
  */
-import { SolidProfileInterface } from "../interfaces/solid-profile.interface"
+import { SolidProfileInterface } from '../interfaces/solid-profile.interface';
 
 export class SolidProfile implements SolidProfileInterface {
     address: {

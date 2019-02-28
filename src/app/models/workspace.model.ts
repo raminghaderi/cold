@@ -1,55 +1,55 @@
-import { PodHandlerService } from "../services/pod-handler.service"
+import { PodHandlerService } from '../services/pod-handler.service';
 import * as utils from '../utils/utililties';
 
 export class Workspace {
-    private uri:string
-    private name:string
-    owner:string
-    podhandler:PodHandlerService
-    indexFile:string
-    me:string
+    private uri: string;
+    private name: string;
+    owner: string;
+    podhandler: PodHandlerService;
+    indexFile: string;
+    me: string;
 
-    constructor(name:string, uri:string,me:string){
-        this.uri = uri // has trailing slash
-        this.me = me
-        this.name = name
-      this.init()
-        
+    constructor(name: string, uri: string, me: string){
+        this.uri = uri; // has trailing slash
+        this.me = me;
+        this.name = name;
+      this.init();
+
     }
 
-    init=async()=>{
-        await this.getOwner()
-       
+    init= async() => {
+        await this.getOwner();
+
     }
 
-    getName():string{
-        return this.name
+    getName(): string{
+        return this.name;
     }
-    setName(name:string){
-        this.name = name
-    }
-
-    getUri():string{
-        return this.uri
+    setName(name: string){
+        this.name = name;
     }
 
-    localIndexFile=():string=>{
-               return this.uri+"/index.ttl"
+    getUri(): string{
+        return this.uri;
     }
 
-    getChatStoreFile():string{
-        return this.uri+"/chats.ttl"
+    localIndexFile= (): string => {
+               return this.uri + '/index.ttl';
     }
 
-   private getOwner =async()=>{        
-    
-     
+    getChatStoreFile(): string{
+        return this.uri + '/chats.ttl';
     }
 
-    isMine():boolean{
-           return this.owner === this.me
+   private getOwner = async() => {
+
+
     }
 
- 
+    isMine(): boolean{
+           return this.owner === this.me;
+    }
+
+
 
 }

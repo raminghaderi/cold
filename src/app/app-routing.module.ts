@@ -11,13 +11,13 @@ import {
 import { AuthGuard } from './services/auth.guard.service';
 
 const routes: Routes = [
-  { path: 'dashboard', 
+  { path: 'dashboard',
   canActivate: [AuthGuard],
    loadChildren: 'app/dashboard/dashboard.module#DashboardModule' },
   {
     path: 'auth',
     loadChildren: './auth/auth.module#AuthModule',
-    
+
   },
   { path: '',  canActivate: [AuthGuard], redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'dashboard' },

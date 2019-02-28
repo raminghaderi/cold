@@ -6,6 +6,6 @@ export class Message {
     uri: string;
     dateCreated: Date;
     maker: string;
-    senderPic:string
-    makerProfile: SolidProfile
+    senderPic: string;
+    makerProfile: SolidProfile;
 }

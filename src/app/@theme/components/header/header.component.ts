@@ -26,7 +26,7 @@ export class HeaderComponent implements OnInit {
               private menuService: NbMenuService,
               private userService: UserProfileService,
               private analyticsService: AnalyticsService,
-              private authService: AuthService
+              private authService: AuthService,
               ) {
   }
 
@@ -34,7 +34,7 @@ export class HeaderComponent implements OnInit {
     this.userService.getUser()
       .subscribe((user: any) => this.user = user);
 
-    this.subscribeToUserMenu()
+    this.subscribeToUserMenu();
   }
 
   toggleSidebar(): boolean {
@@ -65,22 +65,22 @@ export class HeaderComponent implements OnInit {
     )
     .subscribe(
       title => {
-        switch(title){
+        switch (title){
           case 'Profile':
-          this.router.navigate(['/dashboard/profile'], {relativeTo: this.activatedRoute})
-          break  
+          this.router.navigate(['/dashboard/profile'], {relativeTo: this.activatedRoute});
+          break;
           case 'Log out':
-          this.logout()
-          break
+          this.logout();
+          break;
         }
-        
 
-     console.log(`${title} was clicked!`)
-      }
+
+     console.log(`${title} was clicked!`);
+      },
       );
   }
 
-  
+
 logout() {
   this.authService.solidSignOut();
 }
