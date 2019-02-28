@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { UserProfileService } from '../../services/user-profile.service';
 import { PodHandlerService } from '../../services/pod-handler.service';
-import { SolidProfile } from '../../models/solid-profile.model';
 import { NgForm } from '@angular/forms';
 
 @Component({

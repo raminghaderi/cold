@@ -23,11 +23,11 @@ export class UserProfileService {
     return this.user$.asObservable();
   }
 
-  setUser(user: any){
+  setUser(user: any) {
     this.user$.next(user);
   }
 
-  setUserProfile(userProfile: SolidProfile){
+  setUserProfile(userProfile: SolidProfile) {
 
     this.userProfile$.next(userProfile);
     const curProfile = this.userProfile$.getValue();
@@ -36,7 +36,7 @@ export class UserProfileService {
      this.user$.next(user);
   }
 
-  getUserProfile(){
+  getUserProfile() {
     return this.userProfile$.asObservable();
   }
 

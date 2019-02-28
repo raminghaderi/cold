@@ -20,7 +20,6 @@ import { ToastrModule } from 'ngx-toastr';
 
 import { PodHandlerService } from './services/pod-handler.service';
 import { AuthService } from './services/solid.auth.service';
-import { AuthGuard } from './services/auth.guard.service';
 import { RdfService } from './services/rdf.service';
 import { UserProfileService } from './services/user-profile.service';
 

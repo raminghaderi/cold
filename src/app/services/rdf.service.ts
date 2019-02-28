@@ -1,4 +1,3 @@
-import { map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { SolidSession } from '../models/solid-session.model';
 import { SolidProfile } from '../models/solid-profile.model';
@@ -114,15 +113,9 @@ export class RdfService {
         if (oldProfileData[field] && form.value[field] && !form.controls[field].pristine) {
           deletions.push($rdf.st(subject, predicate, oldFieldValue, why));
           insertions.push($rdf.st(subject, predicate, fieldValue, why));
-        }
-
-        //Add a value to be deleted
-        else if (oldProfileData[field] && !form.value[field] && !form.controls[field].pristine) {
+        } else if (oldProfileData[field] && !form.value[field] && !form.controls[field].pristine) {
           deletions.push($rdf.st(subject, predicate, oldFieldValue, why));
-        }
-
-        //Add a value to be inserted
-        else if (!oldProfileData[field] && form.value[field] && !form.controls[field].pristine) {
+        } else if (!oldProfileData[field] && form.value[field] && !form.controls[field].pristine) {
           insertions.push($rdf.st(subject, predicate, fieldValue, why));
         }
       }

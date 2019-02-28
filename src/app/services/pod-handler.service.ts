@@ -1,5 +1,5 @@
+/* tslint:disable:no-console */
 import { Injectable } from '@angular/core';
-import { AuthService } from '../services/solid.auth.service';
 import { RdfService } from '../services/rdf.service';
 import * as SolidFileClient from 'solid-file-client';
 import * as utils from '../utils/utililties';
@@ -41,7 +41,7 @@ export class PodHandlerService {
     }, 500);
   }
 
-  getSession= async () => {
+  getSession = async () => {
 
     console.log(JSON.stringify(solid));
       this.session = await solid.auth.currentSession();
@@ -108,7 +108,7 @@ export class PodHandlerService {
    */
   // TODO: should return Success or failure
   initializeContainers = async (destination: string, isOwner = true) => {
-    const isNew = true;
+    // const isNew = true;
 
     const foldername = this.getWkSpaceName(destination);
     let canAccess = true; // user has permissions to access resource
@@ -120,60 +120,49 @@ export class PodHandlerService {
     if (canAccess) {
       const parentDir = this.storageLocation + this.publicStorage;
 
-      // create root container for app data
-      await this.createContainer(parentDir + '/' + CONTAINERS.rootContainer)
-        .then(wkspce => {
-          return this.createContainer(wkspce + '/' + foldername);
-        })
-        .then(rootDir => {
-
-          /*
-    //containers definition is loaded. Now time to ensure containers exists
-    for (var key in CONTAINERS.subContainers) {
-      (async k => {
-        let value = CONTAINERS.subContainers[k];
-        let resType = typeof value === "object" ? "resource" : "container";
-
-        let resPath = "";
-        let resData = "";
-
-        if (resType === "container") resPath = value;
-        else {
-          resPath = value.path;
-          resData = value.data;
-        }
-
-        this.createContainer(rootDir+"/"+resPath)
-          .then(url2 => {})
-          .catch(err2 => {
-            console.log(err2);
-          });
-      })(key);
-    }  */
-          if (isOwner)  this.createDefaultPermission(rootDir);
-
-       return   this.createNewChat(rootDir, isOwner, destination).then(_ => {
-            // create chat store file
-            return rootDir;
-
-        })
-        .then((rootDir) => {
-          return  this.createFile(rootDir + '/chats.ttl');
-          });
-        })
-        .then((success) => {
-          if (success) {
-
-          } this.toastr.success('Chat space initiated successfully', 'Success!');
-        })
-        .catch(err => {
+      try {
+          // create root container for app data
+          const workSpace = await this.createContainer(parentDir + '/' + CONTAINERS.rootContainer);
+          const rootDir = await this.createContainer(workSpace + '/' + foldername);
+          //containers definition is loaded. Now time to ensure containers exists
+          if (isOwner) {
+            await this.createDefaultPermission(rootDir);
+          }
+          await this.createNewChat(rootDir, isOwner, destination);
+          await this.createFile(rootDir + '/chats.ttl');
+          this.toastr.success('Chat space initiated successfully', 'Success!');
+      } catch (err) {
           console.log(err);
           //TODO: check here if the error code is 404
           this.toastr.error('Message: ' + err, 'An error has occurred');
-        });
+      }
+
+      /*
+        //containers definition is loaded. Now time to ensure containers exists
+        for (var key in CONTAINERS.subContainers) {
+          (async k => {
+            let value = CONTAINERS.subContainers[k];
+            let resType = typeof value === "object" ? "resource" : "container";
+
+            let resPath = "";
+            let resData = "";
+
+            if (resType === "container") resPath = value;
+            else {
+              resPath = value.path;
+              resData = value.data;
+            }
+
+            this.createContainer(rootDir+"/"+resPath)
+              .then(url2 => {})
+              .catch(err2 => {
+                console.log(err2);
+              });
+          })(key);
+        }  */
     }
 
-  }
+  };
 
   getStorageLocation = (webid: any) => {
     return new Promise<string>((resolve, reject) => {
@@ -193,7 +182,7 @@ export class PodHandlerService {
         }
       });
     });
-  }
+  };
 
   createFile(file: string): boolean {
 
@@ -242,8 +231,7 @@ export class PodHandlerService {
       );
 
       this.store.add(newInstance, this.ns.dc('author'), this.store.sym(this.me), newChatDoc);
-    }
-    else {
+    } else {
 
 
 
@@ -283,7 +271,7 @@ export class PodHandlerService {
        }  );
    }
 
-   if (!isOwner && original != undefined){
+   if (!isOwner && original != undefined) {
     const participation = this.newThing(originDoc);
 
    // console.log("Original "+originSym)
@@ -349,7 +337,7 @@ export class PodHandlerService {
    * We are making everyone owner for now
    * @param url
    */
-  createDefaultPermission(newDir: string){
+  createDefaultPermission(newDir: string) {
 
     return new Promise(async (resolve, reject) => {
       // without trailing "/" folder will be unreadable by everyone including owner
@@ -644,7 +632,7 @@ export class PodHandlerService {
         console.log(err);
         return false;
       });
-  }
+  };
 
   joinWorkSpace = (toJoin: string) => {
     // Click on join
@@ -654,7 +642,7 @@ export class PodHandlerService {
     toJoin = utils.removeTrailingSlash(toJoin);
     this.initializeContainers(toJoin, false);
 
-  }
+  };
 
   getWkSpaceName(url: string): string {
     console.log('URL ' + url);

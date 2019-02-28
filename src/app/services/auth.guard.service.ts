@@ -6,7 +6,6 @@ import {
   Router,
 } from '@angular/router';
 import { Observable } from 'rxjs';
-import { map, take, tap } from 'rxjs/operators';
 
 import { AuthService } from './solid.auth.service';
 
@@ -40,7 +39,7 @@ export class AuthGuard implements CanActivate {
     );*/
   }
 
-  async getSession(): Promise<boolean>{
+  async getSession(): Promise<boolean> {
     const session = await solid.auth.currentSession();
     if (!session)
       return false;

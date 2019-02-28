@@ -28,7 +28,7 @@ export class LoginComponent extends NbLoginComponent implements OnInit {
   origin: any;
 
 
-  constructor(  location: Location, private solidAuth: AuthService, nbAuth: NbAuthService,  router: Router, cd: ChangeDetectorRef){
+  constructor(  location: Location, private solidAuth: AuthService, nbAuth: NbAuthService,  router: Router, cd: ChangeDetectorRef) {
     super( nbAuth, {}, cd, router);
 
   }
@@ -41,7 +41,7 @@ export class LoginComponent extends NbLoginComponent implements OnInit {
 
   }
 
-  goToRegistration(){
+  goToRegistration() {
     this.router.navigateByUrl('/register');
   }
 

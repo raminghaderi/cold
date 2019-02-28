@@ -57,7 +57,7 @@ export class HeaderComponent implements OnInit {
     this.analyticsService.trackEvent('startSearch');
   }
 
-  subscribeToUserMenu(){
+  subscribeToUserMenu() {
     this.menuService.onItemClick()
     .pipe(
       filter(({ tag }) => tag === 'user-context-menu'),
@@ -65,7 +65,7 @@ export class HeaderComponent implements OnInit {
     )
     .subscribe(
       title => {
-        switch (title){
+        switch (title) {
           case 'Profile':
           this.router.navigate(['/dashboard/profile'], {relativeTo: this.activatedRoute});
           break;

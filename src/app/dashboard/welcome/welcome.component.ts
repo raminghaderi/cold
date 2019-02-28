@@ -5,7 +5,6 @@ import { RdfService } from '../../services/rdf.service';
 import * as SolidFileClient from 'solid-file-client';
 import { PodHandlerService } from '../../services/pod-handler.service';
 import { SolidSession } from '../../models/solid-session.model';
-import { Observable } from 'rxjs';
 import { Router }  from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 
@@ -30,7 +29,7 @@ export class WelcomeComponent implements OnInit {
   session: SolidSession;
   profileId: any;
   existingWorkspaces: any[];
-  appRootDir: string= CONTAINERS.rootContainer;
+  appRootDir: string = CONTAINERS.rootContainer;
 
   @Input('workspace')  workspace: string;
   @Output('onExistingWorkspaceChange') onExistingWorkspaceChange  = new EventEmitter<any[]>();
@@ -93,7 +92,7 @@ export class WelcomeComponent implements OnInit {
     this.router.navigate(['/dashboard']);
   }
 
-  joinWorkSpace= (url: string) => {
+  joinWorkSpace = (url: string) => {
     this.podhandler.joinWorkSpace(url);
   }
 

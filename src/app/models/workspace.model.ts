@@ -1,5 +1,4 @@
 import { PodHandlerService } from '../services/pod-handler.service';
-import * as utils from '../utils/utililties';
 
 export class Workspace {
     private uri: string;
@@ -9,7 +8,7 @@ export class Workspace {
     indexFile: string;
     me: string;
 
-    constructor(name: string, uri: string, me: string){
+    constructor(name: string, uri: string, me: string) {
         this.uri = uri; // has trailing slash
         this.me = me;
         this.name = name;
@@ -17,27 +16,27 @@ export class Workspace {
 
     }
 
-    init= async() => {
+    init = async() => {
         await this.getOwner();
 
     }
 
-    getName(): string{
+    getName(): string {
         return this.name;
     }
-    setName(name: string){
+    setName(name: string) {
         this.name = name;
     }
 
-    getUri(): string{
+    getUri(): string {
         return this.uri;
     }
 
-    localIndexFile= (): string => {
+    localIndexFile = (): string => {
                return this.uri + '/index.ttl';
     }
 
-    getChatStoreFile(): string{
+    getChatStoreFile(): string {
         return this.uri + '/chats.ttl';
     }
 
@@ -46,7 +45,7 @@ export class Workspace {
 
     }
 
-    isMine(): boolean{
+    isMine(): boolean {
            return this.owner === this.me;
     }
 

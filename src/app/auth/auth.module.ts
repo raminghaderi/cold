@@ -15,13 +15,10 @@ import {
 } from '@nebular/theme';
 
 
-import { RdfService } from '../services/rdf.service';
-import { AuthService } from '../services/solid.auth.service';
 import { AuthRoutingModule } from './auth-routing.module';
 import { ThemeModule } from '../@theme/theme.module';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
-import { PodHandlerService } from '../services/pod-handler.service';
 
 @NgModule({
   declarations: [LoginComponent, RegisterComponent],

@@ -20,7 +20,7 @@ import { takeWhile } from 'rxjs/operators';
 export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
-  messages: any[]= [];
+  messages: any[] = [];
 
   activeWorkSpace: Workspace;
   isIndexSubscribed: boolean = false;
@@ -35,8 +35,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
             private _Activatedroute: ActivatedRoute,
             private menuService: NbMenuService,
             private cdr: ChangeDetectorRef,
-            )
-            {
+            ) {
           //  this.messages = this.chatService.loadMessages();
         }
 
@@ -87,13 +86,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
- send= (msg: string) => {
+ send = (msg: string) => {
    const msgg = msg;
 
 }
 
 
-syncMessages= async () => {
+syncMessages = async () => {
 
 // get references to the index.ttl and chat.ttl files and load to store
 
@@ -130,13 +129,11 @@ const chatDoc = this.podhandler.store.sym(this.activeWorkSpace.getChatStoreFile(
 }
 
 
-workingIndex(): any{
-  if (this.activeWorkSpace.isMine())
-  {
+workingIndex(): any {
+  if (this.activeWorkSpace.isMine()) {
     console.log('ISMINE ' + this.activeWorkSpace.localIndexFile());
     return this.activeWorkSpace.localIndexFile();
-  }
-  else {
+  } else {
     const subject = this.podhandler.store.sym(this.activeWorkSpace.localIndexFile() + '#this');
     const pred =   this.podhandler.store.sym(this.podhandler.ns.rdf('seeAlso'));
     const innd =  this.podhandler.store.canon(this.podhandler.store.any(subject, pred));
@@ -190,7 +187,7 @@ this.cdr.markForCheck();
 
  }
 
- setActiveWS= async(wkspace: any) => {
+ setActiveWS = async(wkspace: any) => {
   const me = this.podhandler.me;
   this.activeWorkSpace = new Workspace(wkspace.name, wkspace.url, me);
   this.activeWorkSpace.setName(wkspace.name);
@@ -243,14 +240,14 @@ getSelectedItem() {
 }
 
 
-deleteFolder(){
+deleteFolder() {
 const url = this.selectedItem['payload'];
 this.fileClient.deleteFolder(this.activeWorkSpace.getUri()).then(success => {
   console.log(`Deleted ${this.activeWorkSpace.getUri()}.`);
 }, err => console.log(err) );
 }
 
-sortFunc(a, b){
+sortFunc(a, b) {
   return a.date - b.date;
  }
 

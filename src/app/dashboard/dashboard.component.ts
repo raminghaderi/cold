@@ -2,24 +2,18 @@ import { Component, OnInit, Injectable } from '@angular/core';
 
 import { NbMenuItem } from '@nebular/theme';
 
-import { MENU_ITEMS } from '../pages/pages-menu';
 
 
 // Services
 import { AuthService } from '../services/solid.auth.service';
-import { RdfService } from '../services/rdf.service';
 import { SolidProfile } from '../models/solid-profile.model';
 import { PodHandlerService } from '../services/pod-handler.service';
 import { UserProfileService } from '../services/user-profile.service';
 
 
-import * as utils from '../utils/utililties';
 
-import { Workspace } from '../models/workspace.model';
 import { SolidSession } from '../models/solid-session.model';
 import { ActivatedRoute } from '@angular/router';
-import { stringify } from '@angular/compiler/src/util';
-import { takeWhile } from 'rxjs/operators';
 
 declare let solid: any;
 declare let $rdf: any;
@@ -55,7 +49,7 @@ export class DashboardComponent implements OnInit {
   webId: string;
   //friends = ['Ramin', 'Samuel', 'Zahra'];
   existingWorkspaces: {}[] = [];
-  friends= [];
+  friends = [];
 
   selectedItem: any;
   fetcher: any;
@@ -103,7 +97,7 @@ export class DashboardComponent implements OnInit {
         this.auth.saveOldUserData(profile);
 
         // LoadFriends
-        for (let f = 0; f < profile.friends.length; f++){
+        for (let f = 0; f < profile.friends.length; f++) {
          const friendProfile = await this.podhandler.rdf.getProfile(profile.friends[f]);
           this.friends.push(friendProfile);
         }
@@ -137,7 +131,7 @@ export class DashboardComponent implements OnInit {
 
 }
 
-generateMenu(){
+generateMenu() {
   const itemGroup = {
     title: 'Spaces',
   icon: 'nb-chat',
