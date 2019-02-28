@@ -11,7 +11,7 @@ export interface SolidProfileInterface {
     company: string;
     email: string;
     fn: string;
-    image: string;
+    picture: string;
     phone: string;
     role: string;
     organization?: string;

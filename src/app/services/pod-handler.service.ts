@@ -8,7 +8,9 @@ import CONTAINERS from "../containers.json";
 
 import solidnamespace from "solid-namespace";
 import { Workspace } from "../models/workspace.model";
+import { ToastrService } from "ngx-toastr";
 
+declare let solid:any;
 declare let $rdf: any;
 
 @Injectable({
@@ -29,24 +31,27 @@ export class PodHandlerService {
 
   readonly publicStorage = "public";
 
-  constructor(private auth: AuthService, private rdf: RdfService) {
+  constructor( public rdf: RdfService,
+    private toastr: ToastrService) {
     this.fetcher = this.rdf.fetcher;
     this.updater = this.rdf.updateManager;
-    this.session = this.rdf.session;
-    this.getSession();
+   // this.session = this.rdf.session;
+    setTimeout(() => {
+      this.getSession()
+    }, 500); ;
   }
 
-  getSession() {
-    this.auth.session.subscribe((val: SolidSession) => {
-      this.session = val;
-      this.me = $rdf.sym(this.session.webId);
+  getSession=async () =>{
+ 
+    console.log(JSON.stringify(solid))
+      this.session = await solid.auth.currentSession();
+
+      this.me = this.session.webId;
       this.webid = this.session.webId.split("profile")[0];
-      
 
       this.getStorageLocation(this.session.webId).then(val => {
         this.storageLocation = val;
       });
-    });
   }
 
   resourceExists(url: string, iscontainer: boolean): Promise<any> {
@@ -145,24 +150,29 @@ export class PodHandlerService {
           });
       })(key);
     }  */
+          if(isOwner)  this.createDefaultPermission(rootDir)
 
-          this.createNewChat(rootDir, isOwner,destination).then(_ => {
+       return   this.createNewChat(rootDir, isOwner,destination).then(_ => {
             // create chat store file
-            this.createFile(rootDir + "/chats.ttl");
+            return rootDir;
+          
+        })
+        .then((rootDir)=>{
+          return  this.createFile(rootDir + "/chats.ttl");
           });
+        })
+        .then((success)=>{
+          if(success) {
+            
+          } this.toastr.success('Chat space initiated successfully', 'Success!');
         })
         .catch(err => {
           console.log(err);
           //TODO: check here if the error code is 404
+          this.toastr.error('Message: '+ err, 'An error has occurred');
         });
     }
 
-    /*
-      .catch(err1 => {
-        isNew = false;
-        console.log("Not  new");
-      });
-    */
   }
 
   getStorageLocation = (webid: any) => {
@@ -185,13 +195,17 @@ export class PodHandlerService {
     });
   };
 
-  createFile(file: string) {
-    //updateFile used because it deletes existing file and creates new
-    this.fileClient.createFile(file).then(
+  createFile(file: string):boolean {
+    
+   return this.fileClient.createFile(file).then(
       success => {
         console.log(`created ${file}.`);
+        return true
       },
-      err => console.log(err)
+      err =>{
+         console.log(err)
+         return false
+      }
     );
   }
 
@@ -227,7 +241,7 @@ export class PodHandlerService {
         newChatDoc
       );
 
-      this.store.add(newInstance, this.ns.dc("author"), this.me, newChatDoc);
+      this.store.add(newInstance, this.ns.dc("author"), this.store.sym(this.me), newChatDoc);
     } 
     else {
      
@@ -272,11 +286,11 @@ export class PodHandlerService {
    if(!isOwner && original != undefined){
     let participation = this.newThing(originDoc)
     
-    console.log("Original "+originSym)
+   // console.log("Original "+originSym)
    
       this.store.add(originSym, this.ns.wf('participation'), participation, originDoc)        
 
-      this.store.add(participation, this.ns.wf('participant'), this.me, originDoc)
+      this.store.add(participation, this.ns.wf('participant'), this.store.sym(this.me), originDoc)
       this.store.add(participation, this.ns.cal('dtstart'), new Date(), originDoc)
      // new $rdf.Statement(participation, this.ns.ui('backgroundColor'), UI.pad.lightColorHash(me), padDoc)
 
@@ -291,7 +305,7 @@ export class PodHandlerService {
       "text/turtle",
       function(uri2, ok, message) {
         if (ok) {
-        //  resolve(uri2);
+          //resolve(uri2);
         } else {
           reject(
             new Error(
@@ -312,13 +326,13 @@ export class PodHandlerService {
           newChatDoc
         ),
         "text/turtle",
-        function(uri2, ok, message) {
+        function(uri3, ok, message) {
           if (ok) {
-            resolve(uri2);
+            resolve(uri3);
           } else {
             reject(
               new Error(
-                "FAILED to save new resource at: " + uri2 + " : " + message
+                "FAILED to save new resource at: " + uri3 + " : " + message
               )
             );
           }
@@ -326,8 +340,64 @@ export class PodHandlerService {
       );
 
 
+
     });
   }
+
+  /**
+   * Create default permissions file .acl
+   * We are making everyone owner for now
+   * @param url 
+   */
+  createDefaultPermission(newDir: string){
+      
+    return new Promise(async (resolve, reject) => {
+      // without trailing "/" folder will be unreadable by everyone including owner
+            let newCurrDir = newDir+"/"             
+            const newOwnerInstance = this.store.sym(newDir+"/.acl#ControlReadWrite");
+           const newPermissionsDoc = newOwnerInstance.doc();
+      
+            this.store.add(newOwnerInstance,this.ns.rdf("type"),this.ns.acl("Authorization"),newPermissionsDoc);
+            this.store.add(newOwnerInstance,this.ns.acl("accessTo"),this.store.sym(newCurrDir),newPermissionsDoc);
+            this.store.add(newOwnerInstance, this.ns.acl("agent"), this.store.sym(this.me), newPermissionsDoc);
+            this.store.add(newOwnerInstance, this.ns.acl("agentClass"), this.ns.foaf("Agent"), newPermissionsDoc);
+            this.store.add(newOwnerInstance, this.ns.acl("defaultForNew"), this.store.sym(newCurrDir), newPermissionsDoc);
+            this.store.add(newOwnerInstance, this.ns.acl("mode"), this.ns.acl("Control"), newPermissionsDoc);
+            this.store.add(newOwnerInstance, this.ns.acl("mode"), this.ns.acl("Read"), newPermissionsDoc);
+            this.store.add(newOwnerInstance, this.ns.acl("mode"), this.ns.acl("Write"), newPermissionsDoc);
+
+            const newReadInstance = this.store.sym(newDir+"/.acl#Read");
+            this.store.add(newReadInstance, this.ns.rdf("type"), this.ns.acl("Authorization"), newPermissionsDoc);
+            this.store.add(newReadInstance,this.ns.acl("accessTo"),this.store.sym(newCurrDir),newPermissionsDoc);
+            this.store.add(newReadInstance, this.ns.acl("defaultForNew"), this.store.sym(newCurrDir), newPermissionsDoc);
+            this.store.add(newReadInstance, this.ns.acl("mode"), this.ns.acl("Read"), newPermissionsDoc);
+
+        await    this.updater.put(
+              newPermissionsDoc,
+              this.store.statementsMatching(
+                undefined,
+                undefined,
+                undefined,
+                newPermissionsDoc
+              ),
+              "text/turtle",
+              function(uri2, ok, message) {
+                if (ok) {
+                  resolve(uri2);
+                } else {
+                  reject(
+                    new Error(
+                      "FAILED to save new resource at: " + uri2 + " : " + message
+                    )
+                  );
+                }
+              }
+            );
+      
+      
+          });
+  }
+
 
   /**
    * Get a list of workspaces

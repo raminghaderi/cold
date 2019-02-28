@@ -2,16 +2,17 @@ import { PodHandlerService } from "../services/pod-handler.service"
 import * as utils from '../utils/utililties';
 
 export class Workspace {
-    uri:string
-   private name:string
+    private uri:string
+    private name:string
     owner:string
     podhandler:PodHandlerService
     indexFile:string
     me:string
 
-    constructor( uri:string,me:string){
+    constructor(name:string, uri:string,me:string){
         this.uri = uri // has trailing slash
         this.me = me
+        this.name = name
       this.init()
         
     }
@@ -28,6 +29,10 @@ export class Workspace {
         this.name = name
     }
 
+    getUri():string{
+        return this.uri
+    }
+
     localIndexFile=():string=>{
                return this.uri+"/index.ttl"
     }
@@ -42,7 +47,7 @@ export class Workspace {
     }
 
     isMine():boolean{
-        return this.owner === this.me
+           return this.owner === this.me
     }
 
  

@@ -60,7 +60,8 @@ export class AuthService {
   */
   solidSignOut = async () => {
     try {
-      await solid.auth.logout();
+   /*   await solid.auth.logout()
+  .then(() => {alert('Goodbye!')); */
       // Remove localStorage
       localStorage.removeItem('solid-auth-client');
       // Redirect to login page
@@ -85,9 +86,9 @@ export class AuthService {
   *  is populated by the getIdentityProviders() function call. It currently requires a callback url and a storage option or else
   *  the call will fail.
   */
-  solidLogin = async (idp: string) => {
+  solidLogin = async (idp: string,callbackUrl) => {
     await solid.auth.login(idp, {
-      callbackUri: `${window.location.href}welcome`,
+      callbackUri:callbackUrl, //`${window.location.href}dashboard`
       storage: localStorage,
     });
   }

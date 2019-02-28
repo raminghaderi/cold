@@ -1,0 +1,34 @@
+<nb-card>
+  <nb-card-header>
+    <p class="chart-description">Here's a complete example build in a bot-like app. Type <code>help</code> to be able to receive different message types.
+      Enjoy the conversation and the beautiful UI.</p>
+  </nb-card-header>
+
+    <div class="row">
+      <div class="chat-container col-md-12 col-lg-7 col-xxxl-7">
+        <nb-chat title="Nebular Conversational UI" size="large" status="success">
+          <nb-chat-message *ngFor="let msg of messages.sort(sortFunc)"
+                           [type]="msg.type"
+                           [message]="msg.text"
+                           [reply]="msg.reply"
+                           [sender]="msg.user.name"
+                           [date]="msg.date"
+                           [files]="msg.files"
+                           [quote]="msg.quote"
+                           [avatar]="msg.user.avatar">
+          </nb-chat-message>
+          <nb-chat-form (send)="sendMessage($event)" [dropFiles]="true">
+          </nb-chat-form>
+        </nb-chat>
+      </div>
+      <div class="chat-container col-md-12 col-lg-5 col-xxxl-5">
+        <div class="chart-features">
+          <p>Selected Chat Space: <strong>{{ activeWorkSpace?.getName() }}</strong></p>
+          <p>Url: {{ activeWorkSpace?.getUri() }}</p>
+            <p>Simply share the above url with others to join this chat space.</p>
+     
+       
+        </div>
+      </div>
+    </div>
+</nb-card>

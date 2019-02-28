@@ -54,6 +54,7 @@ export class RdfService {
    */
   getSession = async() => {
     this.session = await solid.auth.currentSession(localStorage);
+    console.log("SESSION "+JSON.stringify(this.session))
   }
 
   /**
@@ -247,6 +248,8 @@ export class RdfService {
     const doc = $rdf.NamedNode.fromValue(this.session.webId.split('#')[0]);
     const data = this.transformDataForm(form, me, doc);
 
+    console.log("Insertions "+JSON.stringify(data))
+
     //Update existing values
     if(data.insertions.length > 0 || data.deletions.length > 0) {
       this.updateManager.update(data.deletions, data.insertions, (response, success, message) => {
@@ -263,7 +266,7 @@ export class RdfService {
 
   getAddress = (webId?: string) => {
     const linkedUri = this.getValueFromVcard('hasAddress', webId);
-
+console.log("Address: "+linkedUri)
     if (linkedUri) {
       return {
         locality: this.getValueFromVcard('locality', linkedUri),
@@ -317,7 +320,7 @@ export class RdfService {
       prof.company = this.getValueFromVcard('organization-name', url)
       prof.phone =this.getPhone(url)
       prof.role = this.getValueFromVcard('role', url)
-      prof.image =this.getValueFromVcard('hasPhoto', url)
+      prof.picture =this.getValueFromVcard('hasPhoto', url)
       prof.address = this.getAddress(url)
       prof.email = this.getEmail(url)
       prof.friends =this.getValueFromFoaf('knows',url)

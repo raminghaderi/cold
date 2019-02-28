@@ -1,0 +1,32 @@
+<nb-card>
+  <nb-card-header>
+    <h1>Welcome to COLD</h1>
+    <p><b>C</b>ollaboration <b>O</b>ver <b>L</b>inked <b>D</b>ata</p>
+  </nb-card-header>
+
+<div class="container p-5">
+    <div class="container jumbotron text-center vertical-center">
+  
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="basic-addon3">{{workspace}}/{{appRootDir}}/</span>
+            </div>
+            <input type="text" [(ngModel)]="folderName"  class="form-control" id="basic-url" aria-describedby="basic-addon3" required>
+        </div>
+        <button type="button" nbButton (click)="initWorkspace()" [disabled]="!folderName" class="btn btn-primary btn-lg btn-block my-3">Create a workspace</button>
+    
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" #basicUrl aria-describedby="basic-addon3">
+        </div>
+        <button type="button" nbButton class="btn btn-secondary btn-lg btn-block my-3"  (click)="joinWorkSpace(basicUrl.value)" >Join a workspace</button>
+        <br>
+        <h1>Your Workspaces</h1>
+        <br>
+        <ul class="list-group">
+          <!--TO DO: Make it a link -->
+          <li class="list-group-item" *ngFor="let wkspace of existingWorkspaces">
+            <a [routerLink]="" (click)="goToWkSpace(wkspace.name)"> {{ wkspace.name }}</a> </li>
+        </ul>
+    </div>
+</div>
+</nb-card>

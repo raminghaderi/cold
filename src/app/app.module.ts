@@ -1,97 +1,51 @@
+/**
+ * @license
+ * Copyright Akveo. All Rights Reserved.
+ * Licensed under the MIT License. See License.txt in the project root for license information.
+ */
+import { APP_BASE_HREF } from '@angular/common';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
-
+import { CoreModule } from './@core/core.module';
 
 import { AppComponent } from './app.component';
-import { LoginPopupComponent } from './login-popup/login-popup.component';
-import { LoginComponent } from './login/login.component';
-import { CardComponent } from './card/card.component';
-import { DashboardComponent } from './dashboard/dashboard.component';
+import { AppRoutingModule } from './app-routing.module';
+import { ThemeModule } from './@theme/theme.module';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrModule } from 'ngx-toastr';
+ 
+/**Services */
 
-
-// Services
+import { PodHandlerService } from './services/pod-handler.service';
 import { AuthService } from './services/solid.auth.service';
 import { AuthGuard } from './services/auth.guard.service';
-import { NgSelectModule } from '@ng-select/ng-select';
-import { FormsModule } from '@angular/forms';
-import { RegisterComponent } from './register/register.component';
-import { ToastrModule } from 'ngx-toastr';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { WelcomeComponent } from './welcome/welcome.component';
-import { LongchatComponent } from './longchat/longchat.component';
-import { PodHandlerService } from './services/pod-handler.service';
-
-import { MomentModule } from 'angular2-moment';
-import { MessageAreaComponent } from './message-area/message-area.component';
-
-const routes: Routes = [
-  {
-    path: '',
-    component: LoginComponent
-  },
-  {
-    path: 'login',
-    component: LoginComponent
-  },
-  {
-    path: 'login-popup',
-    component: LoginPopupComponent
-  },
-  
-  {
-    path: 'dashboard',
-    component: DashboardComponent,
-    canActivate: [AuthGuard],
-  },
-  {path: 'dashboard/:workspace', component: DashboardComponent,  
-  canActivate: [AuthGuard],
-  },
-  
-  {
-    path: 'card',
-    component: CardComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'register',
-    component: RegisterComponent
-  },
-  {
-    path: 'welcome',
-    component: WelcomeComponent,
-    canActivate: [AuthGuard]
-  },
-  {
-    path: 'longchat',
-    component: LongchatComponent
-  },
-];
+import { RdfService } from './services/rdf.service';
+import { UserProfileService } from './services/user-profile.service';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    LoginComponent,
-    LoginPopupComponent,
-    DashboardComponent,
-    CardComponent,
-    RegisterComponent,
-    WelcomeComponent,
-    LongchatComponent,
-    MessageAreaComponent,
-  ],
+  declarations: [AppComponent],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     HttpClientModule,
-    FormsModule,
-    RouterModule.forRoot(routes),
-    NgSelectModule,
     ToastrModule.forRoot(),
-    BrowserAnimationsModule, // required for toastr
-    MomentModule
+
+    AppRoutingModule,
+    NgbModule.forRoot(),
+    ThemeModule.forRoot(),
+    CoreModule.forRoot(),
   ],
-  providers: [AuthService,PodHandlerService],
+  providers: [
+    AuthService,
+    RdfService,
+    PodHandlerService,
+    UserProfileService,
+    { provide: APP_BASE_HREF, useValue: '/' },
+  ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+
+export class AppModule {
+}
