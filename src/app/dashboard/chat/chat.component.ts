@@ -10,6 +10,8 @@ import * as SolidFileClient from 'solid-file-client';
 import { NbMenuService } from '@nebular/theme';
 import { takeWhile } from 'rxjs/operators';
 
+declare let $rdf:any;
+
 @Component({
   selector: 'ngx-chat',
   templateUrl: 'chat.component.html',
@@ -86,27 +88,41 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
- send = (msg: string) => {
-   const msgg = msg;
-
-}
-
-
 syncMessages = async () => {
 
 // get references to the index.ttl and chat.ttl files and load to store
 
 const indexDoc = this.activeWorkSpace.indexFile + '#this';
-await Promise.all([  this.podhandler.loadResource(indexDoc) ,
+
+if (this.podhandler.store.holds(
+  this.podhandler.store.sym(indexDoc),this.podhandler.ns.rdf('type'),
+  this.podhandler.ns.ldp('Resource'))){
+    this.podhandler.updater.reload(this.podhandler.store,indexDoc,
+      ()=>{this.refreshFunction(indexDoc)})
+  }
+
+else{
+  await Promise.all([  this.podhandler.loadResource(indexDoc) ,
  this.podhandler.loadResource(this.activeWorkSpace.getChatStoreFile()),
 ])
  .then(async _ => {
 
-   const subject = this.podhandler.store.sym(indexDoc);
+ this.refreshFunction(indexDoc)
+
+ }, (err) => {
+   // error occurred
+   console.log(err);
+});
+
+}
+
+
+}
+
+private refreshFunction(indDoc){
+  const subject = this.podhandler.store.sym(indDoc);
    const subjectDoc = subject.doc();
 const chatDoc = this.podhandler.store.sym(this.activeWorkSpace.getChatStoreFile()).doc();
-// Subscribe to receive changes
-
 
   this.podhandler.store.each(
    subject, this.podhandler.ns.wf('message'), null, subjectDoc).forEach( st => {
@@ -120,12 +136,6 @@ const chatDoc = this.podhandler.store.sym(this.activeWorkSpace.getChatStoreFile(
 
    });
 
- }, (err) => {
-   // error occurred
-   console.log(err);
-});
-
-
 }
 
 
@@ -136,9 +146,11 @@ workingIndex(): any {
   } else {
     const subject = this.podhandler.store.sym(this.activeWorkSpace.localIndexFile() + '#this');
     const pred =   this.podhandler.store.sym(this.podhandler.ns.rdf('seeAlso'));
-    const innd =  this.podhandler.store.canon(this.podhandler.store.any(subject, pred));
-    console.log('NOTMINE ' + innd);
-    return innd;
+   
+    // {"termType":"Literal","value":"https://apraku.solid.community/public/cold/PitchMeeting/index.ttl"}
+    const innd =  this.podhandler.store.any(subject, pred);   // returns an object
+    console.log('NOTMINE ' + innd.value);
+    return innd.value;
   }
  }
 
@@ -191,32 +203,39 @@ this.cdr.markForCheck();
   const me = this.podhandler.me;
   this.activeWorkSpace = new Workspace(wkspace.name, wkspace.url, me);
   this.activeWorkSpace.setName(wkspace.name);
+console.log("before loading resource")
+ await  this.podhandler.loadResource(this.activeWorkSpace.localIndexFile());
+  
+console.log("after loading resource")
+  const sym =  this.podhandler.store.sym(this.activeWorkSpace.localIndexFile() + '#this');
+    this.activeWorkSpace.owner   =  this.podhandler.store.any(sym,this.podhandler.store.sym(this.podhandler.ns.dc('author'))).uri;
 
-
- this.activeWorkSpace.owner = await  this.podhandler.loadResource(this.activeWorkSpace.localIndexFile())
-  .then(async (res) => {
-         const sym =  this.podhandler.store.sym(this.activeWorkSpace.localIndexFile() + '#this');
-    const owner = this.podhandler.store.any(sym,
-        this.podhandler.store.sym(this.podhandler.ns.dc('author'))).uri;
-
-        return owner;
-  })
-  .catch(err => {
-      console.log(err);
-  });
-
-
- this.activeWorkSpace.indexFile = await this.workingIndex();
+ this.activeWorkSpace.indexFile = this.workingIndex();
 
  const subject = this.podhandler.store.sym(this.activeWorkSpace.indexFile + '#this');
  const subjectDoc = subject.doc();
  const chatDoc = this.podhandler.store.sym(this.activeWorkSpace.getChatStoreFile()).doc();
  // Subscribe to receive changes
- this.subscribe(subjectDoc, this.syncMessages);
+ console.log("SubjectDoc "+subjectDoc)
+ console.log("Chat Doc "+chatDoc)
+
+ //BUG: Due to a likely bug in Solid, we have to open a websocket to my own pod before 
+ // a websocket connection can be opened to the another person's pod.
+ if(!(this.activeWorkSpace.isMine())) {
+   console.log("Local "+this.activeWorkSpace.localIndexFile()+'#this')
+   let locSym = this.podhandler.store.sym(this.activeWorkSpace.localIndexFile()+'#this').doc()
+  //this.subscribe(locSym,()=>{}); // we really don't need to run any callback on this file
+ const store = $rdf.graph()
+   const fetcher = new $rdf.Fetcher(store)
+   const updater = new $rdf.UpdateManager(store)
+ updater.addDownstreamChangeListener(subjectDoc.uri, this.syncMessages);
+  
+   }
+   else {this.subscribe(subjectDoc, this.syncMessages);}
+ 
   this.subscribe(chatDoc, this.syncMessages);
 
-
-
+  console.log("after subscribe")
 await  this.syncMessages();
 
 }
@@ -233,9 +252,6 @@ getSelectedItem() {
 
 
       console.log('SelectedItem ' + JSON.stringify(this.selectedItem));
-
-
-
     });
 }
 

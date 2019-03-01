@@ -39,7 +39,7 @@ export class RdfService {
    * upstream and downstream changes, and signaling any conflict between them.
    * @see http://linkeddata.github.io/rdflib.js/doc/UpdateManager.html
    */
-  updateManager = $rdf.UpdateManager;
+  updateManager: any;
 
   constructor (private toastr: ToastrService) {
     const fetcherOptions = {};
@@ -259,7 +259,6 @@ export class RdfService {
 
   getAddress = (webId?: string) => {
     const linkedUri = this.getValueFromVcard('hasAddress', webId);
-console.log('Address: ' + linkedUri);
     if (linkedUri) {
       return {
         locality: this.getValueFromVcard('locality', linkedUri),

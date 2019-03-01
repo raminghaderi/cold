@@ -396,7 +396,6 @@ export class PodHandlerService {
     // note url must end with a /
     const appdataUrl = url + '/' + CONTAINERS.rootContainer;
     console.log('AppData ' + appdataUrl);
-    const wklist = [];
     const appstore = this.store.sym(appdataUrl);
     return await this.getFolderItems(this.store, appstore).then(value => {
       return value;
@@ -517,7 +516,23 @@ export class PodHandlerService {
 
 
     this.store.add(subject, this.ns.wf('message'), message, subjectDoc);
-
+    let ins = $rdf.st(subject, this.ns.wf('message'), message, subjectDoc)
+    // Update method is different from put
+    await this.updater.update(
+      [],
+     ins,
+      function(uri2, ok, message) {
+        if (ok) {
+        //  resolve(uri2);
+        } else {
+         console.log(
+            new Error(
+              'FAILED to save new resource at: ' + uri2 + ' : ' + message,
+            ),
+          );
+        }
+      },
+    );
     // sts.push(new $rdf.Statement(message, ns.dc('title'), kb.literal(titlefield.value), messageStore))
   /*  sts.push(
       new $rdf.Statement(
@@ -527,6 +542,8 @@ export class PodHandlerService {
         messageStore
       )
     ); */
+
+
 
     this.store.add(message, this.ns.sioc('content'), this.store.literal(msg), messageStore);
 /*
@@ -558,27 +575,6 @@ export class PodHandlerService {
     };
     this.updater.update([], sts, sendComplete);   */
 
-    await    this.updater.put(
-      subjectDoc,
-      this.store.statementsMatching(
-        undefined,
-        undefined,
-        undefined,
-        subjectDoc,
-      ),
-      'text/turtle',
-      function(uri2, ok, message) {
-        if (ok) {
-        //  resolve(uri2);
-        } else {
-         console.log(
-            new Error(
-              'FAILED to save new resource at: ' + uri2 + ' : ' + message,
-            ),
-          );
-        }
-      },
-    );
 
    await    this.updater.put(
      messageStore,
@@ -622,16 +618,14 @@ export class PodHandlerService {
   }
 
   loadResource = async (url: string): Promise<boolean> => {
+    try{
+    const response = await this.fetcher.load(url)
+    return !!response
+    }
+    catch(err){
+      return false;
+    }
 
-    return  this.fetcher.load(url).then(
-      response => {
-      //  console.log("Resource loaded: "+ JSON.stringify(response))
-        return true;
-      },
-      err => {
-        console.log(err);
-        return false;
-      });
   };
 
   joinWorkSpace = (toJoin: string) => {
