@@ -1,11 +1,11 @@
-import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
-import {  Location } from '@angular/common';
+import { Component, ChangeDetectorRef, OnInit, Inject } from '@angular/core';
+import {  Location, DOCUMENT } from '@angular/common';
 import { NbLoginComponent, NbAuthService } from '@nebular/auth';
 
 // Auth Service
 import { AuthService } from '../../services/solid.auth.service';
 import { SolidProvider } from '../../models/solid-provider.model';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 
 @Component({
@@ -28,7 +28,7 @@ export class LoginComponent extends NbLoginComponent implements OnInit {
   origin: any;
 
 
-  constructor(  location: Location, private solidAuth: AuthService, nbAuth: NbAuthService,  router: Router, cd: ChangeDetectorRef) {
+  constructor(@Inject(DOCUMENT) private document, private activatedRoute:ActivatedRoute, location: Location, private solidAuth: AuthService, nbAuth: NbAuthService,  router: Router, cd: ChangeDetectorRef) {
     super( nbAuth, {}, cd, router);
 
   }
@@ -38,7 +38,9 @@ export class LoginComponent extends NbLoginComponent implements OnInit {
   //  console.log(this.origin);
    this.identityProviders = this.solidAuth.getIdentityProviders();
     console.log('Id providers: ' + JSON.stringify(this.identityProviders));
-
+  
+      console.log("ORIGIN "+JSON.stringify(this.document.location.origin))
+  
   }
 
   goToRegistration() {
@@ -52,7 +54,7 @@ export class LoginComponent extends NbLoginComponent implements OnInit {
     if (idp) {
       try {
 
-        this.solidAuth.solidLogin(idp, `${this.origin}/`);
+        this.solidAuth.solidLogin(idp, `${this.document.location.origin}/`);
       } catch (err) {
         console.log('An error has occurred logging in: ' + err);
       }

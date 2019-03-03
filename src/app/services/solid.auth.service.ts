@@ -46,10 +46,12 @@ export class AuthService {
     try {
       await solid.auth.popupLogin({ popupUri: './login-popup'});
       // Check if session is valid to avoid redirect issues
-      await this.isSessionActive();
-
+    const sess =  await this.isSessionActive();
+      if(this.session){
       // popupLogin success redirect to profile
       this.router.navigate(['/card']);
+      }
+     
     } catch (error) {
       console.log(`Error: ${error}`);
     }
@@ -65,7 +67,7 @@ export class AuthService {
       // Remove localStorage
       localStorage.removeItem('solid-auth-client');
       // Redirect to login page
-      this.router.navigate(['/']);
+      this.router.navigate(['/auth/login']);
     } catch (error) {
       console.log(`Error: ${error}`);
     }
@@ -88,7 +90,7 @@ export class AuthService {
   */
   solidLogin = async (idp: string, callbackUrl) => {
     await solid.auth.login(idp, {
-      callbackUri: callbackUrl, //`${window.location.href}dashboard`
+      callbackUri: `${window.location.href}/dashboard`, 
       storage: localStorage,
     });
   }
