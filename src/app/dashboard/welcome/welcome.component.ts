@@ -6,9 +6,10 @@ import * as SolidFileClient from 'solid-file-client';
 import { PodHandlerService } from '../../services/pod-handler.service';
 import { SolidSession } from '../../models/solid-session.model';
 import { Router }  from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
+import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
 
 import CONTAINERS from '../../containers.json';
+import { NbToastStatus } from '@nebular/theme/components/toastr/model';
 
 //const filedc = require('solid-file-client');
 
@@ -30,6 +31,8 @@ export class WelcomeComponent implements OnInit {
   profileId: any;
   existingWorkspaces: any[];
   appRootDir: string = CONTAINERS.rootContainer;
+  store:any
+  ns:any
 
   @Input('workspace')  workspace: string;
   @Output('onExistingWorkspaceChange') onExistingWorkspaceChange  = new EventEmitter<any[]>();
@@ -37,10 +40,13 @@ export class WelcomeComponent implements OnInit {
 
 
   constructor(private router: Router,
-              private toastr: ToastrService,
+              private toastr: NbToastrService,
               private auth: AuthService,
               private rdf: RdfService,
-              private podhandler: PodHandlerService) { }
+              private podhandler: PodHandlerService) { 
+                this.store = this.podhandler.store
+                this.ns = this.podhandler.ns
+              }
 
   ngOnInit() {
     this.getWebId();
@@ -52,7 +58,7 @@ export class WelcomeComponent implements OnInit {
 
   }
 
-  getWebId = async function() {
+  getWebId = async ()=> {
 
     const session = await solid.auth.currentSession();
     this.webId = session.webId.split('profile')[0];
@@ -95,5 +101,40 @@ export class WelcomeComponent implements OnInit {
   joinWorkSpace = (url: string) => {
     this.podhandler.joinWorkSpace(url);
   }
+
+  
+  deleteWKspace(url){    
+    let folder = this.store.sym(url+"/").doc()
+    this.deleteRecursive(folder)
+  }
+
+ deleteRecursive= (folder) =>{
+  return new Promise( (resolve, reject)=> {
+    this.store.fetcher.load(folder).then( ()=> {
+      let promises = this.store.each(folder, this.ns.ldp('contains')).map(file => {
+        if (this.store.holds(file, this.ns.rdf('type'), this.ns.ldp('BasicContainer'))) {
+          return this.deleteRecursive(file)
+        } else {
+          console.log('deleteRecursive file: ' + file)
+          if (!confirm(' Really DELETE File ' + file)) {
+            throw new Error('User aborted delete file')
+          }
+          return this.store.fetcher.webOperation('DELETE', file.uri)
+        }
+      })
+      console.log('deleteRecursive folder: ' + folder)
+      if (!confirm(' Really DELETE folder ' + folder)) {
+        throw new Error('User aborted delete file')
+      }
+      promises.push(this.store.fetcher.webOperation('DELETE', folder.uri))
+      Promise.all(promises).then(res => {
+        this.toastr.show(`${folder.uri} deleted successfully`,
+        'Success', {position:NbGlobalPhysicalPosition.TOP_RIGHT,status:NbToastStatus.SUCCESS});
+        resolve()
+         })
+    })
+  })
+}
+
 
 }

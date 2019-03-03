@@ -8,7 +8,8 @@ import CONTAINERS from '../containers.json';
 
 import solidnamespace from 'solid-namespace';
 import { Workspace } from '../models/workspace.model';
-import { ToastrService } from 'ngx-toastr';
+import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
+import { NbToastStatus } from '@nebular/theme/components/toastr/model';
 
 declare let solid: any;
 declare let $rdf: any;
@@ -32,7 +33,7 @@ export class PodHandlerService {
   readonly publicStorage = 'public';
 
   constructor( public rdf: RdfService,
-    private toastr: ToastrService) {
+    private toastr: NbToastrService) {
     this.fetcher = this.rdf.fetcher;
     this.updater = this.rdf.updateManager;
    // this.session = this.rdf.session;
@@ -130,11 +131,14 @@ export class PodHandlerService {
           }
           await this.createNewChat(rootDir, isOwner, destination);
           await this.createFile(rootDir + '/chats.ttl');
-          this.toastr.success('Chat space initiated successfully', 'Success!');
+          this.toastr.show('Chat space initiated successfully',
+           'Success', {position:NbGlobalPhysicalPosition.TOP_RIGHT,status:NbToastStatus.SUCCESS});
       } catch (err) {
           console.log(err);
           //TODO: check here if the error code is 404
-          this.toastr.error('Message: ' + err, 'An error has occurred');
+          this.toastr.show(`'An error has occurred. Message:  ${err}`,
+           'Error', {position:NbGlobalPhysicalPosition.TOP_RIGHT,status:NbToastStatus.DANGER});
+         
       }
 
       /*
@@ -255,8 +259,8 @@ export class PodHandlerService {
       );
       this.store.add(
         newInstance,
-        this.ns.rdf('seeAlso'),
-        originDoc.uri,
+        this.ns.owl('sameAs'),
+        originSym,
         newChatDoc,
       );
 
@@ -504,7 +508,7 @@ export class PodHandlerService {
     const timestamp = '' + now.getTime();
     const dateStamp = $rdf.term(now);
 
-    const subject = this.store.sym(workspace.indexFile + '#this');
+    const subject = this.store.sym(workspace.indexFile);
 
     //TODO: Get All participants and load their messages
 
@@ -515,7 +519,7 @@ export class PodHandlerService {
     const message = this.store.sym(messageStore.uri + '#' + 'Msg' + timestamp);
 
 
-    this.store.add(subject, this.ns.wf('message'), message, subjectDoc);
+    //this.store.add(subject, this.ns.wf('message'), message, subjectDoc);
     let ins = $rdf.st(subject, this.ns.wf('message'), message, subjectDoc)
     // Update method is different from put
     await this.updater.update(
@@ -533,37 +537,61 @@ export class PodHandlerService {
         }
       },
     );
-    // sts.push(new $rdf.Statement(message, ns.dc('title'), kb.literal(titlefield.value), messageStore))
-  /*  sts.push(
-      new $rdf.Statement(
+
+
+    let sts =[]
+    // msgSts.push(new $rdf.Statement(message, ns.dc('title'), kb.literal(titlefield.value), messageStore))
+    sts.push(
+       $rdf.st(
         message,
         this.ns.sioc("content"),
         this.store.literal(msg),
         messageStore
       )
-    ); */
+    ); 
+
+ //   this.store.add(message, this.ns.sioc('content'), this.store.literal(msg), messageStore);
 
 
-
-    this.store.add(message, this.ns.sioc('content'), this.store.literal(msg), messageStore);
-/*
     sts.push(
-      new $rdf.Statement(
+      $rdf.st(
         message,
         this.ns.dc("created"),
         dateStamp,
         messageStore
       )
-    ); */
+    ); 
 
-    this.store.add( message,
-      this.ns.dc('created'),
-      dateStamp,
-      messageStore);
+  //  this.store.add( message,this.ns.dc('created'),dateStamp,messageStore);
 
 
   //  if (workspace.isMine)
-        this.store.add(message, this.ns.foaf('maker'), workspace.me, messageStore);
+//        this.store.add(message, this.ns.foaf('maker'), workspace.me, messageStore);
+
+        sts.push(
+          $rdf.st(
+            message,
+            this.ns.foaf("maker"),
+            workspace.me,
+            messageStore
+          )
+        ); 
+
+        await this.updater.update(
+          [],
+         sts,
+          function(uri3, ok, message) {
+            if (ok) {
+            //  resolve(uri2);
+            } else {
+             console.log(
+                new Error(
+                  'FAILED to save new resource at: ' + uri3 + ' : ' + message,
+                ),
+              );
+            }
+          },
+        );          
 /*
     var sendComplete = function(uri, success, body) {
       if (!success) {
@@ -575,7 +603,7 @@ export class PodHandlerService {
     };
     this.updater.update([], sts, sendComplete);   */
 
-
+/*
    await    this.updater.put(
      messageStore,
      this.store.statementsMatching(
@@ -597,6 +625,7 @@ export class PodHandlerService {
        }
      },
    );
+   */
 
   }
 

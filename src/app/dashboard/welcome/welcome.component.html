@@ -25,7 +25,8 @@
         <ul class="list-group">
           <!--TO DO: Make it a link -->
           <li class="list-group-item" *ngFor="let wkspace of existingWorkspaces">
-            <a [routerLink]="" (click)="goToWkSpace(wkspace.name)"> {{ wkspace.name }}</a> </li>
+            <a [routerLink]="" (click)="goToWkSpace(wkspace.name)"> {{ wkspace.name }}</a>
+            <button (click)=deleteWKspace(wkspace.url)>X</button> </li>
         </ul>
     </div>
 </div>

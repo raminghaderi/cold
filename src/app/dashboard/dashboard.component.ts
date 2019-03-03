@@ -1,4 +1,4 @@
-import { Component, OnInit, Injectable } from '@angular/core';
+import { Component, OnInit, Injectable, OnDestroy } from '@angular/core';
 
 import { NbMenuItem } from '@nebular/theme';
 
@@ -13,7 +13,7 @@ import { UserProfileService } from '../services/user-profile.service';
 
 
 import { SolidSession } from '../models/solid-session.model';
-import { ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 
 declare let solid: any;
 declare let $rdf: any;
@@ -40,7 +40,7 @@ declare let $rdf: any;
 })
 
 
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   profile: SolidProfile;
 
   profileImage: string;
@@ -56,28 +56,37 @@ export class DashboardComponent implements OnInit {
 
   owner: string;
 
+  navigationSubscription
+
   menu:  NbMenuItem[] = [
-    {
-      title: 'Dashboard',
-      icon: 'nb-home',
-      link: '/',
-      home: true,
-    },
-    {
-      title: 'Chat Spaces',
-      group: true,
-
-    },
-
+   
   ];
 
-  constructor(private auth: AuthService,
+  constructor(private router: Router,
+    private auth: AuthService,
     private route: ActivatedRoute,
     private podhandler: PodHandlerService,
     private userService: UserProfileService) {
+    this.navigationSubscription = this.router.events.subscribe((e: any) => {
+      // If it is a NavigationEnd event re-initalise the component
+      if (e instanceof NavigationEnd) {
+        this.initialiseDashboard();
+      }
+    });
+
      }
 
   ngOnInit() {
+  
+  }
+
+  ngOnDestroy(): void {
+    if (this.navigationSubscription) {  
+      this.navigationSubscription.unsubscribe();
+   }
+  }
+
+  initialiseDashboard(){
       this.fetcher =   this.fetcher = this.podhandler.rdf.fetcher;
     this.loadProfile(this.getAvailableWorkspaces);
   }
@@ -132,12 +141,17 @@ export class DashboardComponent implements OnInit {
 }
 
 generateMenu() {
-  const itemGroup = {
+ 
+  if(this.menu.length === 0)  this.menu.push( {title: 'Dashboard',icon: 'nb-home',link: '/',home: true})
+  if(this.menu.length === 1) this.menu.push({title: 'Chat Spaces',group: true})
+  if(this.menu.length === 2) this.menu.push({
     title: 'Spaces',
   icon: 'nb-chat',
   expanded: true,
-  children: [],
-  };
+  children:[],
+  })
+
+  
 
 
 
@@ -150,14 +164,33 @@ generateMenu() {
     };
 
     item.title = workspace.name;
-    item.link = '/dashboard/chat/' + workspace.name,
-   item.payload  = workspace,
-    itemGroup.children.push(item);
+    item.link = '/dashboard/chat/' + workspace.name
+   item.payload  = workspace
+  
+ 
+  if (!this.menuItemExists(item)) {
+    console.log("Item "+JSON.stringify(item))
+    this.menu[2].children.push(item);
+  }
 
   });
 
-  if (itemGroup.children.length > 0)
-      this.menu = [...this.menu, itemGroup];
+  /*
+   if (itemGroup.children.length > 0){
+   const newG = itemGroup
+     this.menu = [...this.menu, newG];
+    // itemGroup.children = []
+   }  */
+      
 }
+
+menuItemExists(item:any):boolean{
+ 
+     const alreadyExist = this.menu[2].children.find((wkspace) => wkspace.link === item.link );
+
+  return alreadyExist != undefined
+ 
+}
+
 
 }

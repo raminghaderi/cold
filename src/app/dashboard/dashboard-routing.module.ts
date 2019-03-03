@@ -12,6 +12,7 @@ const routes: Routes = [{
     {
       path: '',
       component: WelcomeComponent,
+      runGuardsAndResolvers: 'always',
     },
 
     {
@@ -26,6 +27,7 @@ const routes: Routes = [{
       path: 'chat',
       redirectTo: '/dashboard',
       pathMatch: 'full',
+      runGuardsAndResolvers: 'always',
     },
     {
       path: '**',
