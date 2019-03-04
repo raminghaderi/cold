@@ -90,7 +90,7 @@ export class AuthService {
   */
   solidLogin = async (idp: string, callbackUrl) => {
     await solid.auth.login(idp, {
-      callbackUri: `${window.location.href}/dashboard`, 
+      callbackUri: callbackUrl, 
       storage: localStorage,
     });
   }

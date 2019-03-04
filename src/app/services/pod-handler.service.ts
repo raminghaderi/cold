@@ -108,7 +108,7 @@ export class PodHandlerService {
    * Subscribe to websocket
    */
   // TODO: should return Success or failure
-  initializeContainers = async (destination: string, isOwner = true) => {
+  initializeContainers = async (destination: string, isOwner = true):Promise<boolean>  => {
     // const isNew = true;
 
     const foldername = this.getWkSpaceName(destination);
@@ -133,12 +133,13 @@ export class PodHandlerService {
           await this.createFile(rootDir + '/chats.ttl');
           this.toastr.show('Chat space initiated successfully',
            'Success', {position:NbGlobalPhysicalPosition.TOP_RIGHT,status:NbToastStatus.SUCCESS});
+           return true
       } catch (err) {
           console.log(err);
           //TODO: check here if the error code is 404
           this.toastr.show(`'An error has occurred. Message:  ${err}`,
            'Error', {position:NbGlobalPhysicalPosition.TOP_RIGHT,status:NbToastStatus.DANGER});
-         
+         return false
       }
 
       /*
@@ -395,15 +396,12 @@ export class PodHandlerService {
    * Get a list of workspaces
    */
   async getListWorkSpaces(url): Promise<any> {
-    let workspaces: {};
-
+   
     // note url must end with a /
     const appdataUrl = url + '/' + CONTAINERS.rootContainer;
     console.log('AppData ' + appdataUrl);
     const appstore = this.store.sym(appdataUrl);
-    return await this.getFolderItems(this.store, appstore).then(value => {
-      return value;
-    });
+    return await this.getFolderItems(appdataUrl)
   }
 
   getFileContent = async (file: string) => {
@@ -425,62 +423,24 @@ export class PodHandlerService {
     );
   }
 
-  getFolderItems = async (graph: any, subject: any) => {
-    const contains = {
-      folders: [],
-      files: [],
-    };
+  getFolderItems = async (subject: any) => {
+  return this.fileClient.readFolder(subject).then(folder => {
 
-    //load a folder and get the contents
-    let files = [];
-    await this.fetcher
-      .load(subject)
-      .then((_) => {
-        // get the folder contents
-        files = this.store
-          .match(subject, this.ns.ldp('contains'))
-          .concat(
-            this.store.match(
-              null,
-              this.ns.rdf('type'),
-              this.ns.ldp('container'),
-              null,
-            ),
-          )
-          .map(st => st.object);
+      console.log(`Read ${folder.name}, it has ${folder.folders.length} files.`);
+      console.log(JSON.stringify(folder))
+      return folder
+    }, err => {
+      console.log("Error: Folderitems "+err)
+      return   {
+        folders: [],
+        files: [],
+      };
+   });
+    
+  }
 
-        for (let i = 0; i < files.length; i++) {
-          const item = files[i];
-
-          const newItem: any = {};
-          newItem.type = this.getFileType(this.store, item.value);
-
-          //    var stats = self.getStats(graph,item.value)
-          //    newItem.modified = stats.modified
-          //    newItem.size = stats.size
-          //    newItem.mtime = stats.mtime
-          newItem.label = decodeURIComponent(item.value).replace(/.*\//, '');
-
-            const name = item.value.replace(/\/$/, '');
-            newItem.name = name.replace(/.*\//, '');
-            item.value = item.value.replace(/[/]+/g, '/');
-            item.value = item.value.replace(/https:/, 'https:/');
-            newItem.url = subject.doc().uri + '/' + newItem.name;
-          if (newItem.type === 'folder') {
-
-            contains.folders.push(newItem);
-          } else {
-            contains.files.push(newItem);
-          }
-        }
-
-        return contains;
-      })
-      .catch(err => {
-        console.log(err);
-      });
-
-    return contains;
+  processFolders(url){
+   
   }
 
   getFileType = (graph, url) => {
@@ -657,13 +617,13 @@ export class PodHandlerService {
 
   };
 
-  joinWorkSpace = (toJoin: string) => {
+  joinWorkSpace = (toJoin: string):Promise<boolean> => {
     // Click on join
     // Add to participantlist
     // Extract workspace name from
     // set original url
     toJoin = utils.removeTrailingSlash(toJoin);
-    this.initializeContainers(toJoin, false);
+  return  this.initializeContainers(toJoin, false);
 
   };
 

@@ -28,13 +28,13 @@ export class LoginComponent extends NbLoginComponent implements OnInit {
   origin: any;
 
 
-  constructor(@Inject(DOCUMENT) private document, private activatedRoute:ActivatedRoute, location: Location, private solidAuth: AuthService, nbAuth: NbAuthService,  router: Router, cd: ChangeDetectorRef) {
+  constructor(@Inject(DOCUMENT) private document, private activatedRoute:ActivatedRoute, private solidAuth: AuthService, nbAuth: NbAuthService,  router: Router, cd: ChangeDetectorRef) {
     super( nbAuth, {}, cd, router);
 
   }
 
   ngOnInit() {
-      this.origin = location.origin;
+    
   //  console.log(this.origin);
    this.identityProviders = this.solidAuth.getIdentityProviders();
     console.log('Id providers: ' + JSON.stringify(this.identityProviders));

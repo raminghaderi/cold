@@ -7,9 +7,11 @@ import { PodHandlerService } from '../../services/pod-handler.service';
 import { SolidSession } from '../../models/solid-session.model';
 import { Router }  from '@angular/router';
 import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
+import { NbToastStatus } from '@nebular/theme/components/toastr/model';
 
 import CONTAINERS from '../../containers.json';
-import { NbToastStatus } from '@nebular/theme/components/toastr/model';
+import * as utils from '../../utils/utililties';
+import { SharedService } from '../../services/shared-service.service';
 
 //const filedc = require('solid-file-client');
 
@@ -41,6 +43,7 @@ export class WelcomeComponent implements OnInit {
 
   constructor(private router: Router,
               private toastr: NbToastrService,
+              private sharedService:SharedService,
               private auth: AuthService,
               private rdf: RdfService,
               private podhandler: PodHandlerService) { 
@@ -71,11 +74,17 @@ export class WelcomeComponent implements OnInit {
   }
 
 
-  initWorkspace() {
+  initWorkspace=async ()=> {
       const dest = this.workspace + '/' + this.appRootDir + '/' + this.folderName;
       console.log(dest);
       // check if folder exists
-      this.podhandler.initializeContainers(dest);
+    const resp = await  this.podhandler.initializeContainers(dest);
+    if(resp)
+    {
+    
+     this.getExistingWorkspaces();
+     this.folderName = ''
+    }
   }
 
   // TODO: redirect to dashboard and
@@ -84,7 +93,8 @@ export class WelcomeComponent implements OnInit {
    .then( value => {
      if (typeof value === 'object') {
        this.existingWorkspaces = value.folders;
-       this.onExistingWorkspaceChange.emit();
+      // this.onExistingWorkspaceChange.emit();
+      this.sharedService.emitWorskspaceUpdate(this.existingWorkspaces)
      }
 
     // do something with the workspaces
@@ -98,8 +108,17 @@ export class WelcomeComponent implements OnInit {
     this.router.navigate(['/dashboard']);
   }
 
-  joinWorkSpace = (url: string) => {
-    this.podhandler.joinWorkSpace(url);
+  joinWorkSpace = async (url: string) => {
+     // Click on join
+    // Add to participantlist
+    // Extract workspace name from
+    // set original url
+    url = utils.removeTrailingSlash(url);
+   const response = await this.podhandler.initializeContainers(url, false);;
+   if(response)
+   {
+    this.getExistingWorkspaces();
+   }
   }
 
   

@@ -1,4 +1,4 @@
-import { Component, OnInit, Injectable, OnDestroy } from '@angular/core';
+import { Component, OnInit, Injectable, OnDestroy, ChangeDetectorRef } from '@angular/core';
 
 import { NbMenuItem } from '@nebular/theme';
 
@@ -14,6 +14,7 @@ import { UserProfileService } from '../services/user-profile.service';
 
 import { SolidSession } from '../models/solid-session.model';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { SharedService } from '../services/shared-service.service';
 
 declare let solid: any;
 declare let $rdf: any;
@@ -63,6 +64,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ];
 
   constructor(private router: Router,
+    private cdr: ChangeDetectorRef,
+    private sharedService: SharedService,
     private auth: AuthService,
     private route: ActivatedRoute,
     private podhandler: PodHandlerService,
@@ -73,6 +76,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.initialiseDashboard();
       }
     });
+
+    this.sharedService.workspaceChangeEmitted$.subscribe(workspaces =>{
+      this.getAvailableWorkspaces()
+      
+    })
 
      }
 
@@ -127,16 +135,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     getAvailableWorkspaces = async() => {
      const storageSpace = this.webId + '/public';
-      await this.podhandler.getListWorkSpaces(storageSpace)
-    .then( value => {
-       if (typeof value === 'object') {
-          this.existingWorkspaces  = value.folders;
-   }
+     const folder = await this.podhandler.getListWorkSpaces(storageSpace)
+     
+          this.existingWorkspaces  = folder.folders;
+  
 
    this.generateMenu();
   // do something with the workspaces
-    console.log('Workspaces: ' + JSON.stringify(value));
- });
+    console.log('Workspaces: ' + JSON.stringify(folder.folders));
+  this.cdr.markForCheck()
 
 }
 
@@ -171,9 +178,12 @@ generateMenu() {
   if (!this.menuItemExists(item)) {
     console.log("Item "+JSON.stringify(item))
     this.menu[2].children.push(item);
+    this.menu[2].children.sort(this.sortFunction)
   }
 
   });
+
+  
 
   /*
    if (itemGroup.children.length > 0){
@@ -182,6 +192,10 @@ generateMenu() {
     // itemGroup.children = []
    }  */
       
+}
+
+sortFunction(a,b){
+  return a.title.localeCompare(b.title); 
 }
 
 menuItemExists(item:any):boolean{

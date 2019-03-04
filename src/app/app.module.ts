@@ -22,6 +22,7 @@ import { PodHandlerService } from './services/pod-handler.service';
 import { AuthService } from './services/solid.auth.service';
 import { RdfService } from './services/rdf.service';
 import { UserProfileService } from './services/user-profile.service';
+import { SharedService } from './services/shared-service.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -37,6 +38,7 @@ import { UserProfileService } from './services/user-profile.service';
     CoreModule.forRoot(),
   ],
   providers: [
+    SharedService,
     AuthService,
     RdfService,
     PodHandlerService,
