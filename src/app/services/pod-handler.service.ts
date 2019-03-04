@@ -426,8 +426,8 @@ export class PodHandlerService {
   getFolderItems = async (subject: any) => {
   return this.fileClient.readFolder(subject).then(folder => {
 
-      console.log(`Read ${folder.name}, it has ${folder.folders.length} files.`);
-      console.log(JSON.stringify(folder))
+     // console.log(`Read ${folder.name}, it has ${folder.folders.length} files.`);
+   //   console.log(JSON.stringify(folder))
       return folder
     }, err => {
       console.log("Error: Folderitems "+err)
@@ -479,26 +479,6 @@ export class PodHandlerService {
     const message = this.store.sym(messageStore.uri + '#' + 'Msg' + timestamp);
 
 
-    //this.store.add(subject, this.ns.wf('message'), message, subjectDoc);
-    let ins = $rdf.st(subject, this.ns.wf('message'), message, subjectDoc)
-    // Update method is different from put
-    await this.updater.update(
-      [],
-     ins,
-      function(uri2, ok, message) {
-        if (ok) {
-        //  resolve(uri2);
-        } else {
-         console.log(
-            new Error(
-              'FAILED to save new resource at: ' + uri2 + ' : ' + message,
-            ),
-          );
-        }
-      },
-    );
-
-
     let sts =[]
     // msgSts.push(new $rdf.Statement(message, ns.dc('title'), kb.literal(titlefield.value), messageStore))
     sts.push(
@@ -512,7 +492,6 @@ export class PodHandlerService {
 
  //   this.store.add(message, this.ns.sioc('content'), this.store.literal(msg), messageStore);
 
-
     sts.push(
       $rdf.st(
         message,
@@ -522,11 +501,6 @@ export class PodHandlerService {
       )
     ); 
 
-  //  this.store.add( message,this.ns.dc('created'),dateStamp,messageStore);
-
-
-  //  if (workspace.isMine)
-//        this.store.add(message, this.ns.foaf('maker'), workspace.me, messageStore);
 
         sts.push(
           $rdf.st(
@@ -552,40 +526,26 @@ export class PodHandlerService {
             }
           },
         );          
-/*
-    var sendComplete = function(uri, success, body) {
-      if (!success) {
-        console.log("Error message "+body);
-        return false;
-      } else {
-        return true;
-      }
-    };
-    this.updater.update([], sts, sendComplete);   */
 
-/*
-   await    this.updater.put(
-     messageStore,
-     this.store.statementsMatching(
-       undefined,
-       undefined,
-       undefined,
-       messageStore,
-     ),
-     'text/turtle',
-     function(uri2, ok, message) {
-       if (ok) {
-       //  resolve(uri2);
-       } else {
-        console.log(
-           new Error(
-             'FAILED to save new resource at: ' + uri2 + ' : ' + message,
-           ),
-         );
-       }
-     },
-   );
-   */
+         //this.store.add(subject, this.ns.wf('message'), message, subjectDoc);
+    let ins = $rdf.st(subject, this.ns.wf('message'), message, subjectDoc)
+    // Update method is different from put
+    await this.updater.update(
+      [],
+     ins,
+      function(uri2, ok, message) {
+        if (ok) {
+        //  resolve(uri2);
+        } else {
+         console.log(
+            new Error(
+              'FAILED to save new resource at: ' + uri2 + ' : ' + message,
+            ),
+          );
+        }
+      },
+    );
+
 
   }
 

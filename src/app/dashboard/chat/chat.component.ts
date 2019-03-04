@@ -32,6 +32,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
   fileClient = SolidFileClient;
   selectedItem: any;
+  isMsgSyncing = false
+
+  messageTurtle:string =""
 
 
   subscription: Subscription;
@@ -81,6 +84,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         icon: 'nb-compose',
       };
     });
+    
  const that = this;
     this.podhandler.sendMessage(this.activeWorkSpace,
       event.message)
@@ -114,14 +118,12 @@ const chatFile = this.activeWorkSpace.getChatStoreFile()
 const chatDoc = this.store.sym(chatFile)
 
 
-if (this.store.holds(indexDoc
-  ,this.podhandler.ns.rdf('type'),
-  this.podhandler.ns.ldp('Resource'))){
-    this.podhandler.updater.reload(this.store,indexDoc,
-      ()=>{
-        this.refreshFunction(index)})
-    this.podhandler.updater.reload(this.store,chatDoc, ()=>{
-      this.refreshFunction(index)})
+if (this.store.holds(indexDoc,this.podhandler.ns.rdf('type'),this.podhandler.ns.ldp('Resource')) ){
+  
+    this.podhandler.updater.reload(this.store,chatDoc, ()=>{}) 
+
+       this.podhandler.updater.reload(this.store,indexDoc,
+      ()=>{ this.refreshFunction(index)})
   }
 
 
@@ -130,6 +132,7 @@ else{
  this.podhandler.loadResource(this.activeWorkSpace.getChatStoreFile()),
 ])
  .then(async _ => {
+   
  this.refreshFunction(index)
 
  }, (err) => {
@@ -143,7 +146,10 @@ else{
 }
 
  refreshFunction(indDoc){
-  
+   if(this.isMsgSyncing){
+    return
+   }
+  this.isMsgSyncing = true
   const subject = this.store.sym(indDoc);
    const subjectDoc = subject.doc();
 const chatDoc = this.store.sym(this.activeWorkSpace.getChatStoreFile()).doc();
@@ -154,13 +160,18 @@ const chatDoc = this.store.sym(this.activeWorkSpace.getChatStoreFile()).doc();
        const messageFile = st.doc().uri;
      this.fileClient.fetchAndParse(messageFile, 'text/turtle').then(graph => {
      
-   
+   this.messageTurtle = graph
     this.parseMessage(graph, st);
+    
 
-    }, err => console.log(err) );
+
+    }, err => {
+      console.log(err)
+    this.isMsgSyncing = false
+    } );
 
    });
-
+this.isMsgSyncing = false
 }
 
 
@@ -188,10 +199,13 @@ workingIndex(): any {
   *  */
  parseMessage = async (graph: any, msgSym: any) => {
 
+  
+   const maker =  graph.any(msgSym, this.podhandler.ns.foaf('maker'), null);
+   
+if(maker != undefined){
    const msg = new Message();
   const content =  graph.any(msgSym, this.podhandler.ns.sioc('content'), null);
    const time =  graph.any(msgSym, this.podhandler.ns.dc('created'), null);
-   const maker =  graph.any(msgSym, this.podhandler.ns.foaf('maker'), null);
 
   msg.uri = msgSym.value;
   msg.content =  content != undefined ? content.value : '';
@@ -212,16 +226,16 @@ workingIndex(): any {
   type:  'text', //files.length ? 'file' :
  // files: files,
   user: {
-    name: msg.makerProfile.fn,
-    avatar: msg.makerProfile.picture,
+    name: msg.makerProfile ? msg.makerProfile.fn : "",
+    avatar: msg.makerProfile ? msg.makerProfile.picture : "",
   },
 });
 this.cdr.markForCheck();
  }
-
-
+}
 
  }
+
 
  setActiveWS = async(wkspace: any) => {
   const me = this.podhandler.me;
@@ -241,10 +255,12 @@ this.cdr.markForCheck();
  const subjectDoc = subject.doc();
  const chatDoc = this.store.sym(this.activeWorkSpace.getChatStoreFile()).doc();
 
- if(!(this.activeWorkSpace.isMine())){ } else {
- }
-
-
+ /*
+ if((this.activeWorkSpace.isMine())){
+this.subscribe(subjectDoc, this.syncMessages);
+      this.subscribe(chatDoc, this.syncMessages);
+  } else {  
+  } */
   // we use a timer to subscribe to updates because
   // the websocket doesn't work if current user is not owner of the chat
   const timerInterval =interval(5000);
@@ -252,7 +268,7 @@ this.cdr.markForCheck();
      this.syncMessages()
    })
 
-   this.subscribe(subjectDoc, this.syncMessages);
+
   await  this.syncMessages();
 
 }

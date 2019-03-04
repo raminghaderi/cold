@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { UserProfileService } from '../../services/user-profile.service';
 import { PodHandlerService } from '../../services/pod-handler.service';
 import { NgForm } from '@angular/forms';
@@ -7,21 +7,30 @@ import { NgForm } from '@angular/forms';
   selector: 'profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileComponent implements OnInit {
 
-  profile: any;
+  profile:any ={} // {fn:string,company:string,role:string,picture:string,email:string,friends:[]};
 
   @ViewChild('f') cardForm: NgForm;
 
 
   constructor(private podhandler: PodHandlerService,
-    private userService: UserProfileService) { }
+    private userService: UserProfileService,
+    private cdr: ChangeDetectorRef) {
+ this.userService.getUserProfile()
+    .subscribe((userProf) => { 
+      this.profile = userProf
+     
+    
+console.log("PROFILE "+JSON.stringify(this.profile))
+
+    });
+     }
 
   ngOnInit() {
-    this.userService.getUserProfile()
-    .subscribe((user: any) => this.profile = user);
-
+   
      // Clear cached profile data
     // TODO: Remove this code and find a better way to get the old data
     localStorage.removeItem('oldProfileData');

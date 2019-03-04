@@ -142,7 +142,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
    this.generateMenu();
   // do something with the workspaces
-    console.log('Workspaces: ' + JSON.stringify(folder.folders));
+   // console.log('Workspaces: ' + JSON.stringify(folder.folders));
   this.cdr.markForCheck()
 
 }
@@ -176,7 +176,7 @@ generateMenu() {
   
  
   if (!this.menuItemExists(item)) {
-    console.log("Item "+JSON.stringify(item))
+  //  console.log("Item "+JSON.stringify(item))
     this.menu[2].children.push(item);
     this.menu[2].children.sort(this.sortFunction)
   }

@@ -1,11 +1,13 @@
 <nb-card>
   <nb-card-header>
-   {{ activeWorkSpace?.getName() }} 
+   {{ activeWorkSpace?.getName() }} Chat Space
+   <p>Address: {{ activeWorkSpace?.getUri() }}</p>
+   <p>Share the address to invite others to join this chat space.</p>
   </nb-card-header>
 
     <div class="row">
-      <div class="chat-container col-md-12 col-lg-7 col-xxxl-7">
-        <nb-chat title="Nebular Conversational UI" size="large" status="info">
+      <div class="chat-container col-md-12 col-lg-6 col-xxxl-6">
+        <nb-chat title="Chat Messages" size="large" status="info">
           <nb-chat-message *ngFor="let msg of messages.sort(sortFunc)"
                            [type]="msg.type"
                            [message]="msg.text"
@@ -20,12 +22,21 @@
           </nb-chat-form>
         </nb-chat>
       </div>
-      <div class="chat-container col-md-12 col-lg-5 col-xxxl-5">
+      <div class="col-md-12 col-lg-5 col-xxxl-5">
         <div class="chart-features">
-          <p>Selected Chat Space: <strong>{{ activeWorkSpace?.getName() }}</strong></p>
-          <p>Url: {{ activeWorkSpace?.getUri() }}</p>
-            <p>Simply share the above url with others to join this chat space.</p>
-     
+          <p> Your Messages stored on your POD </p>
+          <nb-card>
+            <nb-card-body>
+             <figure>
+               <pre>
+                <code>
+                {{ messageTurtle }}
+              </code>
+               </pre>
+             </figure>
+            
+            </nb-card-body>
+          </nb-card>
        
         </div>
       </div>

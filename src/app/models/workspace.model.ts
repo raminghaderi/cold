@@ -33,11 +33,11 @@ export class Workspace {
     }
 
     localIndexFile = (): string => {
-               return this.uri + '/index.ttl';
+               return this.uri + 'index.ttl';
     }
 
     getChatStoreFile(): string {
-        return this.uri + '/chats.ttl';
+        return this.uri + 'chats.ttl';
     }
 
    private getOwner = async() => {

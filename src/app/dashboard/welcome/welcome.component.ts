@@ -1,5 +1,5 @@
 
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { AuthService } from '../../services/solid.auth.service';
 import { RdfService } from '../../services/rdf.service';
 import * as SolidFileClient from 'solid-file-client';
@@ -21,7 +21,7 @@ declare let $rdf: any;
 @Component({
   selector: 'app-welcome',
   templateUrl: './welcome.component.html',
-  styleUrls: ['./welcome.component.scss'],
+  styleUrls: ['./welcome.component.scss']
 })
 
 export class WelcomeComponent implements OnInit {
