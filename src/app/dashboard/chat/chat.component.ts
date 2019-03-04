@@ -110,13 +110,20 @@ const index = this.activeWorkSpace.indexFile ;
 
 const indexDoc = this.store.sym(index).doc()
 
+const chatFile = this.activeWorkSpace.getChatStoreFile()
+const chatDoc = this.store.sym(chatFile)
+
+
 if (this.store.holds(indexDoc
   ,this.podhandler.ns.rdf('type'),
   this.podhandler.ns.ldp('Resource'))){
     this.podhandler.updater.reload(this.store,indexDoc,
       ()=>{
         this.refreshFunction(index)})
+    this.podhandler.updater.reload(this.store,chatDoc, ()=>{
+      this.refreshFunction(index)})
   }
+
 
 else{
   await Promise.all([  this.podhandler.loadResource(index) ,
@@ -136,6 +143,7 @@ else{
 }
 
  refreshFunction(indDoc){
+  
   const subject = this.store.sym(indDoc);
    const subjectDoc = subject.doc();
 const chatDoc = this.store.sym(this.activeWorkSpace.getChatStoreFile()).doc();
@@ -145,7 +153,8 @@ const chatDoc = this.store.sym(this.activeWorkSpace.getChatStoreFile()).doc();
 
        const messageFile = st.doc().uri;
      this.fileClient.fetchAndParse(messageFile, 'text/turtle').then(graph => {
-
+     
+   
     this.parseMessage(graph, st);
 
     }, err => console.log(err) );
@@ -179,7 +188,7 @@ workingIndex(): any {
   *  */
  parseMessage = async (graph: any, msgSym: any) => {
 
-  const msg = new Message();
+   const msg = new Message();
   const content =  graph.any(msgSym, this.podhandler.ns.sioc('content'), null);
    const time =  graph.any(msgSym, this.podhandler.ns.dc('created'), null);
    const maker =  graph.any(msgSym, this.podhandler.ns.foaf('maker'), null);
@@ -188,7 +197,7 @@ workingIndex(): any {
   msg.content =  content != undefined ? content.value : '';
   msg.dateCreated =  new Date(time);
 
-  msg.maker = maker.value;
+  msg.maker = maker ? maker.value : "";
 
   msg.makerProfile =  await this.podhandler.rdf.getProfile(msg.maker);
 
@@ -218,33 +227,32 @@ this.cdr.markForCheck();
   const me = this.podhandler.me;
   this.activeWorkSpace = new Workspace(wkspace.name, wkspace.url, me);
   this.activeWorkSpace.setName(wkspace.name);
-console.log("before loading resource")
+//console.log("before loading resource")
  await  this.podhandler.loadResource(this.activeWorkSpace.localIndexFile());
   
-console.log("after loading resource")
+//console.log("after loading resource")
   const sym =  this.store.sym(this.activeWorkSpace.localIndexFile() + '#this');
     this.activeWorkSpace.owner   =  this.store.any(sym,this.store.sym(this.podhandler.ns.dc('author'))).uri;
 
  this.activeWorkSpace.indexFile = this.workingIndex();
 
- console.log("Subject INDEX "+this.activeWorkSpace.indexFile)
+ //console.log("Subject INDEX "+this.activeWorkSpace.indexFile)
  const subject = this.store.sym(this.activeWorkSpace.indexFile);
  const subjectDoc = subject.doc();
  const chatDoc = this.store.sym(this.activeWorkSpace.getChatStoreFile()).doc();
 
- if(!(this.activeWorkSpace.isMine())){
+ if(!(this.activeWorkSpace.isMine())){ } else {
+ }
+
 
   // we use a timer to subscribe to updates because
   // the websocket doesn't work if current user is not owner of the chat
   const timerInterval =interval(5000);
    this.subscription = timerInterval.subscribe(val =>{
-
      this.syncMessages()
    })
- } else {
-   this.subscribe(subjectDoc, this.syncMessages);
- }
 
+   this.subscribe(subjectDoc, this.syncMessages);
   await  this.syncMessages();
 
 }
